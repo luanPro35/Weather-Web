@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ứng dụng Thời tiết - Dự báo</title>
+    <link rel="stylesheet" href="../css/trangchu.css" />
+    <link rel="stylesheet" href="../css/dubao.css" />
+
+    <!-- Font Awesome CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="brand">
+        <i class="fas fa-sun brand-icon"></i>
+        <span class="brand-name">Weathery</span>
+      </div>
+      <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <ul class="nav-menu" id="navMenu">
+        <li class="nav-item">
+          <a
+            href="#"
+            class="nav-link active"
+            onclick="showSection('home', this)"
+          >
+            <i class="fas fa-home"></i> Trang chủ
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link" onclick="showSection('forecast', this)">
+            <i class="fas fa-calendar-alt"></i> Dự báo
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            href="../html/thanhpho.html"
+            class="nav-link"
+            onclick="showSection('cities', this)"
+          >
+            <i class="fas fa-city"></i> Thành phố
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            href="../html/thongbao.html"
+            class="nav-link"
+            onclick="showSection('notifications', this)"
+          >
+            <i class="fas fa-bell"></i> Thông báo
+          </a>
+        </li>
+        <li class="nav-item">
+          <div class="settings-dropdown">
+            <button class="settings-btn">
+              <i class="fas fa-cog"></i>
+            </button>
+            <div class="settings-content">
+              <div class="temp-toggle">
+                <span>°C</span>
+                <label class="switch">
+                  <input type="checkbox" id="tempUnitToggle" />
+                  <span class="slider round"></span>
+                </label>
+                <span>°F</span>
+              </div>
+              <div class="language-select">
+                <select id="languageSelect">
+                  <option value="vi">Tiếng Việt</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <!-- Section Trang chủ -->
+      <section id="homeSection" class="section">
+        <div class="search-container">
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input
+              type="text"
+              id="cityInput"
+              class="search-box"
+              placeholder="Nhập tên thành phố..."
+            />
+          </div>
+        </div>
+        <div id="weatherContent">
+          <!-- Thời tiết hiện tại sẽ được JS chèn vào đây -->
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Đang tải thông tin thời tiết...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Dự báo -->
+      <section id="forecastSection" class="section" style="display: none">
+        <h2
+          class="section-title app-title"
+          style="font-size: 2.5rem; margin-bottom: 30px"
+        >
+          Dự báo thời tiết
+        </h2>
+
+        <div class="forecast-layout">
+          <!-- Cột trái: Dự báo theo giờ và Biểu đồ -->
+          <div class="forecast-main-column">
+            <div class="hourly-forecast-section forecast-card">
+              <h3 class="forecast-subtitle">Dự báo theo giờ (24 giờ tới)</h3>
+              <div class="hourly-forecast-grid scrollable">
+                <p class="loading-text">Đang tải dự báo theo giờ...</p>
+              </div>
+            </div>
+
+            <div class="temperature-chart-section forecast-card">
+              <h3 class="forecast-subtitle">Biểu đồ nhiệt độ (24 giờ tới)</h3>
+              <div class="chart-wrapper">
+                <canvas id="temperatureChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cột phải: Dự báo 5 ngày -->
+          <div class="daily-forecast-section forecast-card">
+            <h3 class="forecast-subtitle">Dự báo 5-7 ngày tới</h3>
+            <div class="daily-forecast-grid">
+              <p class="loading-text">Đang tải dự báo hàng ngày...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Thành phố (Placeholder) -->
+      <section id="citiesSection" class="section" style="display: none">
+        <h2 class="section-title app-title">Quản lý Thành phố</h2>
+        <p style="text-align: center; color: white; font-size: 1.2rem">
+          Tính năng này đang được phát triển.
+        </p>
+      </section>
+
+      <!-- Section Thông báo (Placeholder) -->
+      <section id="notificationsSection" class="section" style="display: none">
+        <h2 class="section-title app-title">Thông báo Thời tiết</h2>
+        <p style="text-align: center; color: white; font-size: 1.2rem">
+          Tính năng này đang được phát triển.
+        </p>
+      </section>
+    </div>
+    <script src="../js/dubao.js"></script>
+  </body>
+</html>

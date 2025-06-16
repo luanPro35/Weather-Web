@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/trangchu.css" />
+    <link rel="stylesheet" href="../css/thanhpho.css" />
+    <title>Ứng dụng Thời tiết - Thành phố yêu thích</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  <body>
+    <nav class="navbar">
+      <div class="brand">
+        <i class="fas fa-sun brand-icon"></i>
+        <span class="brand-name">Weathery</span>
+      </div>
+      <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <ul class="nav-menu" id="navMenu">
+        <li class="nav-item">
+          <a href="../html/trangchu.html" class="nav-link">
+            <i class="fas fa-home"></i> Trang chủ
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="../html/dubao.html" class="nav-link">
+            <i class="fas fa-calendar-alt"></i> Dự báo
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="../html/thanhpho.html" class="nav-link active">
+            <i class="fas fa-city"></i> Thành phố
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="../html/thongbao.html" class="nav-link">
+            <i class="fas fa-bell"></i> Thông báo
+          </a>
+        </li>
+        <li class="nav-item">
+          <div class="settings-dropdown">
+            <button class="settings-btn">
+              <i class="fas fa-cog"></i>
+            </button>
+            <div class="settings-content">
+              <div class="temp-toggle">
+                <span>°C</span>
+                <label class="switch">
+                  <input type="checkbox" id="tempUnitToggle" />
+                  <span class="slider round"></span>
+                </label>
+                <span>°F</span>
+              </div>
+              <div class="language-select">
+                <select id="languageSelect">
+                  <option value="vi">Tiếng Việt</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <section id="citiesPageSection" class="section">
+        <h2 class="section-title">Thành phố Yêu thích</h2>
+
+        <p class="page-description">
+          Lưu lại những thành phố bạn thường xuyên theo dõi thời tiết để truy
+          cập nhanh chóng. Nhấp vào tên thành phố để xem chi tiết dự báo và thời
+          tiết hiện tại.
+        </p>
+
+        <div class="favorite-cities-container">
+          <div class="add-city-form">
+            <div class="search-container">
+              <input
+                type="text"
+                id="newCityInput"
+                class="search-box"
+                placeholder="Nhập tên thành phố để thêm..."
+                autocomplete="off"
+              />
+              <i class="fas fa-search search-icon"></i>
+            </div>
+            <button id="addCityBtn" class="btn btn-primary">
+              <i class="fas fa-plus"></i> Thêm thành phố
+            </button>
+          </div>
+
+          <h3 class="forecast-subtitle">Danh sách đã lưu</h3>
+          <div id="favoriteCitiesList" class="favorite-cities-grid">
+            <div class="empty-list-placeholder" id="emptyListMessage">
+              <i class="fas fa-map-marked-alt empty-icon"></i>
+              <p>Danh sách của bạn hiện đang trống.</p>
+              <span>Hãy thêm thành phố đầu tiên!</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <script src="../js/thanhpho.js"></script>
+  </body>
+</html>

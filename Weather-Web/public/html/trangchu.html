@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather App - Thời tiết thông minh</title>
+    <link rel="stylesheet" href="../css/trangchu.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="brand">
+        <i class="fas fa-sun brand-icon"></i>
+        <span class="brand-name">Weathery</span>
+      </div>
+      <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <ul class="nav-menu" id="navMenu">
+        <li class="nav-item">
+          <a
+            href="../html/trangchu.html"
+            class="nav-link active"
+            onclick="showSection('home', this)"
+          >
+            <i class="fas fa-home"></i> Trang chủ
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="../html/dubao.html" class="nav-link">
+            <i class="fas fa-calendar-alt"></i> Dự báo
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="../html/thanhpho.html" class="nav-link">
+            <i class="fas fa-city"></i> Thành phố
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="../html/thongbao.html" class="nav-link">
+            <i class="fas fa-bell"></i> Thông báo
+          </a>
+        </li>
+        <li class="nav-item">
+          <div class="settings-dropdown">
+            <button class="settings-btn">
+              <i class="fas fa-cog"></i>
+            </button>
+            <div class="settings-content">
+              <div class="temp-toggle">
+                <span>°C</span>
+                <label class="switch">
+                  <input type="checkbox" id="tempUnitToggle" />
+                  <span class="slider round"></span>
+                </label>
+                <span>°F</span>
+              </div>
+              <div class="language-select">
+                <select id="languageSelect">
+                  <option value="vi">Tiếng Việt</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <!-- Home Section -->
+      <div id="homeSection" class="section">
+        <div class="search-container">
+          <div class="search-wrapper">
+            <input
+              type="text"
+              id="cityInput"
+              class="search-box"
+              placeholder="Nhập tên thành phố..."
+            />
+            <i class="fas fa-search search-icon"></i>
+          </div>
+        </div>
+
+        <div id="weatherContent"></div>
+      </div>
+
+      <!-- Empty sections for other pages -->
+      <div id="forecastSection" class="section" style="display: none"></div>
+      <div id="citiesSection" class="section" style="display: none"></div>
+      <div
+        id="notificationsSection"
+        class="section"
+        style="display: none"
+      ></div>
+    </div>
+    <script src="../js/trangchu.js"></script>
+  </body>
+</html>

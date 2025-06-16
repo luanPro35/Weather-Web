@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/trangchu.css" />
+    <link rel="stylesheet" href="../css/thongbao.css" />
+    <title>Ứng dụng Thời tiết - Thông báo thông minh</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="weather-animation" id="weatherAnimation"></div>
+
+    <nav class="navbar">
+      <div class="brand">
+        <i class="fas fa-sun brand-icon"></i>
+        <span class="brand-name">Weathery</span>
+      </div>
+      <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <ul class="nav-menu" id="navMenu">
+        <li class="nav-item">
+          <a
+            href="../html/trangchu.html"
+            class="nav-link active"
+            onclick="showSection('home', this)"
+          >
+            <i class="fas fa-home"></i> Trang chủ
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="../html/dubao.html" class="nav-link">
+            <i class="fas fa-calendar-alt"></i> Dự báo
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="../html/thanhpho.html" class="nav-link">
+            <i class="fas fa-city"></i> Thành phố
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="../html/thongbao.html" class="nav-link">
+            <i class="fas fa-bell"></i> Thông báo
+          </a>
+        </li>
+        <li class="nav-item">
+          <div class="settings-dropdown">
+            <button class="settings-btn">
+              <i class="fas fa-cog"></i>
+            </button>
+            <div class="settings-content">
+              <div class="temp-toggle">
+                <span>°C</span>
+                <label class="switch">
+                  <input type="checkbox" id="tempUnitToggle" />
+                  <span class="slider round"></span>
+                </label>
+                <span>°F</span>
+              </div>
+              <div class="language-select">
+                <select id="languageSelect">
+                  <option value="vi">Tiếng Việt</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <div class="page-header">
+        <h1 class="page-title">
+          <i class="fas fa-bell"></i>
+          Thông Báo Thông Minh
+        </h1>
+        <p class="page-subtitle">
+          Cấu hình thông báo thời tiết cá nhân hóa để không bao giờ bỏ lỡ thông
+          tin quan trọng
+        </p>
+      </div>
+
+      <!-- Quick Settings -->
+      <div class="quick-settings">
+        <div class="quick-setting" onclick="toggleAllNotifications()">
+          <i class="fas fa-power-off" style="color: #ff6b6b"></i>
+          <div>Tắt/Bật tất cả</div>
+        </div>
+        <div class="quick-setting" onclick="setQuietHours()">
+          <i class="fas fa-moon" style="color: #4ecdc4"></i>
+          <div>Giờ yên tĩnh</div>
+        </div>
+        <div class="quick-setting" onclick="importSettings()">
+          <i class="fas fa-download" style="color: #ffd700"></i>
+          <div>Tải cài đặt</div>
+        </div>
+        <div class="quick-setting" onclick="exportSettings()">
+          <i class="fas fa-upload" style="color: #45b7d1"></i>
+          <div>Xuất cài đặt</div>
+        </div>
+      </div>
+
+      <div class="notifications-grid">
+        <!-- Thông báo thời tiết hàng ngày -->
+        <div class="notification-card">
+          <div class="card-header">
+            <div
+              class="card-icon"
+              style="background: linear-gradient(135deg, #ffd700, #ffed4e)"
+            >
+              <i class="fas fa-sun"></i>
+            </div>
+            <div class="card-title">Báo cáo thời tiết hàng ngày</div>
+          </div>
+          <div class="card-description">
+            Nhận báo cáo thời tiết chi tiết mỗi ngày với dự báo chính xác và lời
+            khuyên phù hợp.
+          </div>
+
+          <label class="toggle-switch">
+            <input type="checkbox" id="dailyWeather" checked />
+            <span class="slider"></span>
+          </label>
+
+          <div class="time-picker-group">
+            <input
+              type="time"
+              class="time-input"
+              id="dailyTime"
+              value="07:00"
+            />
+            <select class="time-input" id="dailyFrequency">
+              <option value="daily">Hàng ngày</option>
+              <option value="weekdays">Thứ 2-6</option>
+              <option value="weekends">Cuối tuần</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Cảnh báo thời tiết khắc nghiệt -->
+        <div class="notification-card">
+          <div class="card-header">
+            <div
+              class="card-icon"
+              style="background: linear-gradient(135deg, #ff6b6b, #ee5a52)"
+            >
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="card-title">Cảnh báo thời tiết khắc nghiệt</div>
+          </div>
+          <div class="card-description">
+            Nhận thông báo ngay lập tức khi có cảnh báo bão, mưa lớn, nắng nóng
+            hay các hiện tượng thời tiết nguy hiểm.
+          </div>
+
+          <label class="toggle-switch">
+            <input type="checkbox" id="severeWeather" checked />
+            <span class="slider"></span>
+          </label>
+
+          <div class="condition-tags">
+            <div class="condition-tag active" data-condition="storm">
+              🌩️ Bão
+            </div>
+            <div class="condition-tag active" data-condition="heavy-rain">
+              🌧️ Mưa lớn
+            </div>
+            <div class="condition-tag active" data-condition="extreme-heat">
+              🔥 Nắng nóng
+            </div>
+            <div class="condition-tag active" data-condition="fog">
+              🌫️ Sương mù
+            </div>
+          </div>
+        </div>
+
+        <!-- Dự báo mưa thông minh -->
+        <div class="notification-card">
+          <div class="card-header">
+            <div
+              class="card-icon"
+              style="background: linear-gradient(135deg, #4ecdc4, #44a08d)"
+            >
+              <i class="fas fa-cloud-rain"></i>
+            </div>
+            <div class="card-title">Dự báo mưa thông minh</div>
+          </div>
+          <div class="card-description">
+            Nhận thông báo trước 30-60 phút khi có mưa để chuẩn bị ô, áo mưa
+            hoặc thay đổi kế hoạch.
+          </div>
+
+          <label class="toggle-switch">
+            <input type="checkbox" id="rainForecast" checked />
+            <span class="slider"></span>
+          </label>
+
+          <div class="time-picker-group">
+            <select class="time-input" id="rainAdvanceTime">
+              <option value="30">30 phút trước</option>
+              <option value="60" selected>1 giờ trước</option>
+              <option value="120">2 giờ trước</option>
+            </select>
+            <select class="time-input" id="rainIntensity">
+              <option value="light">Mưa nhẹ</option>
+              <option value="moderate" selected>Mưa vừa</option>
+              <option value="heavy">Mưa to</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Thông báo email -->
+        <div class="notification-card">
+          <div class="card-header">
+            <div
+              class="card-icon"
+              style="background: linear-gradient(135deg, #45b7d1, #3498db)"
+            >
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div class="card-title">Báo cáo email hàng tuần</div>
+          </div>
+          <div class="card-description">
+            Nhận báo cáo thời tiết chi tiết qua email với biểu đồ, xu hướng và
+            lời khuyên cho tuần tới.
+          </div>
+
+          <label class="toggle-switch">
+            <input type="checkbox" id="emailReports" />
+            <span class="slider"></span>
+          </label>
+
+          <div class="email-input-container">
+            <input
+              type="email"
+              class="email-input"
+              placeholder="Nhập email của bạn"
+              id="emailAddress"
+            />
+            <button class="btn btn-primary" onclick="saveEmail()">
+              <i class="fas fa-save"></i>
+              Lưu
+            </button>
+          </div>
+        </div>
+
+        <!-- Thông báo hoạt động ngoài trời -->
+        <div class="notification-card">
+          <div class="card-header">
+            <div
+              class="card-icon"
+              style="background: linear-gradient(135deg, #2ecc71, #27ae60)"
+            >
+              <i class="fas fa-running"></i>
+            </div>
+            <div class="card-title">Thời tiết hoạt động ngoài trời</div>
+          </div>
+          <div class="card-description">
+            Nhận gợi ý thời điểm tốt nhất để chạy bộ, đi bộ, dã ngoại dựa trên
+            điều kiện thời tiết.
+          </div>
+
+          <label class="toggle-switch">
+            <input type="checkbox" id="outdoorActivity" />
+            <span class="slider"></span>
+          </label>
+
+          <div class="condition-tags">
+            <div class="condition-tag" data-activity="running">🏃‍♂️ Chạy bộ</div>
+            <div class="condition-tag" data-activity="cycling">🚴‍♂️ Đạp xe</div>
+            <div class="condition-tag" data-activity="hiking">🥾 Leo núi</div>
+            <div class="condition-tag" data-activity="picnic">🧺 Dã ngoại</div>
+          </div>
+        </div>
+
+        <!-- Chỉ số UV và chăm sóc da -->
+        <div class="notification-card">
+          <div class="card-header">
+            <div
+              class="card-icon"
+              style="background: linear-gradient(135deg, #f39c12, #e67e22)"
+            >
+              <i class="fas fa-hand-paper"></i>
+            </div>
+            <div class="card-title">Chỉ số UV & Chăm sóc da</div>
+          </div>
+          <div class="card-description">
+            Nhận cảnh báo về chỉ số UV cao và lời khuyên bảo vệ da phù hợp với
+            từng thời điểm.
+          </div>
+
+          <label class="toggle-switch">
+            <input type="checkbox" id="uvIndex" />
+            <span class="slider"></span>
+          </label>
+
+          <div class="time-picker-group">
+            <select class="time-input" id="uvThreshold">
+              <option value="3">UV từ 3 (Trung bình)</option>
+              <option value="6" selected>UV từ 6 (Cao)</option>
+              <option value="8">UV từ 8 (Rất cao)</option>
+              <option value="11">UV từ 11 (Cực cao)</option>
+            </select>
+            <input
+              type="time"
+              class="time-input"
+              id="uvCheckTime"
+              value="10:00"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Smart Suggestions -->
+      <div class="smart-suggestions">
+        <div class="suggestions-title">
+          <i class="fas fa-lightbulb" style="color: #ffd700"></i>
+          Gợi ý thông minh
+        </div>
+        <div class="suggestion-item">
+          <div>
+            <div style="font-weight: 500">Bật thông báo mưa cho ngày mai</div>
+            <div style="font-size: 0.9rem; opacity: 0.7">
+              Dự báo có mưa lớn từ 14:00-17:00
+            </div>
+          </div>
+          <button class="btn btn-secondary" onclick="acceptSuggestion('rain')">
+            <i class="fas fa-check"></i>
+            Áp dụng
+          </button>
+        </div>
+        <div class="suggestion-item">
+          <div>
+            <div style="font-weight: 500">
+              Điều chỉnh giờ thông báo hàng ngày
+            </div>
+            <div style="font-size: 0.9rem; opacity: 0.7">
+              Dựa trên thói quen sử dụng của bạn
+            </div>
+          </div>
+          <button
+            class="btn btn-secondary"
+            onclick="acceptSuggestion('timing')"
+          >
+            <i class="fas fa-clock"></i>
+            Xem gợi ý
+          </button>
+        </div>
+      </div>
+
+      <!-- Notification History -->
+      <div class="notification-history">
+        <div class="history-title">
+          <i class="fas fa-history"></i>
+          Lịch sử thông báo
+        </div>
+        <div id="historyList">
+          <div class="history-item">
+            <div class="history-icon">
+              <i class="fas fa-sun" style="color: #ffd700"></i>
+            </div>
+            <div class="history-content">
+              <div class="history-message">
+                Báo cáo thời tiết hàng ngày - Hôm nay trời nắng đẹp
+              </div>
+              <div class="history-time">15 phút trước</div>
+            </div>
+          </div>
+          <div class="history-item">
+            <div class="history-icon">
+              <i class="fas fa-cloud-rain" style="color: #4ecdc4"></i>
+            </div>
+            <div class="history-content">
+              <div class="history-message">
+                Cảnh báo mưa - Dự báo mưa trong 45 phút tới
+              </div>
+              <div class="history-time">2 giờ trước</div>
+            </div>
+          </div>
+          <div class="history-item">
+            <div class="history-icon">
+              <i class="fas fa-exclamation-triangle" style="color: #ff6b6b"></i>
+            </div>
+            <div class="history-content">
+              <div class="history-message">
+                Cảnh báo nhiệt độ cao - UV index: 9 (Rất cao)
+              </div>
+              <div class="history-time">Hôm qua</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../js/thongbao.js"></script>
+  </body>
+</html>
