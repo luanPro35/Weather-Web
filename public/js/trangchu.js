@@ -187,6 +187,10 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
       // Update weather UI
       function updateWeatherUI(data) {
         const weatherContent = document.getElementById("weatherContent");
+        if (!weatherContent) {
+            console.error("Element with ID 'weatherContent' not found.");
+            return;
+        }
         const weather = data.weather[0];
         const temp = Math.round(data.main.temp);
         const suggestions = getWeatherSuggestions(
@@ -264,6 +268,10 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
       // Fetch weather data
       async function getWeather(city) {
         const weatherContent = document.getElementById("weatherContent");
+        if (!weatherContent) {
+            console.error("Element with ID 'weatherContent' not found. Cannot display loading or weather info.");
+            return;
+        }
         weatherContent.innerHTML = `
           <div class="loading">
             <div class="loading-spinner"></div>
@@ -304,35 +312,155 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
 
 
         const cityInput = document.getElementById("cityInput");
-        cityInput.addEventListener("keypress", (e) => {
-          if (e.key === "Enter" && cityInput.value.trim()) {
-            getWeather(cityInput.value.trim());
-          }
-        });
+        if (cityInput) {
+            cityInput.addEventListener("keypress", (e) => {
+              if (e.key === "Enter" && cityInput.value.trim()) {
+                getWeather(cityInput.value.trim());
+              }
+            });
+        } else {
+            console.warn("Element with ID 'cityInput' not found.");
+        }
 
         // Temperature unit toggle
         const tempUnitToggle = document.getElementById("tempUnitToggle");
-        tempUnitToggle.addEventListener("change", () => {
-          const isFahrenheit = tempUnitToggle.checked;
-          // Convert all temperature displays
-          const temps = document.querySelectorAll(".temperature");
-          temps.forEach((temp) => {
-            const currentTemp = parseFloat(temp.textContent);
-            if (isFahrenheit) {
-              temp.textContent = `${Math.round((currentTemp * 9) / 5 + 32)}°F`;
-            } else {
-              temp.textContent = `${Math.round(
-                ((currentTemp - 32) * 5) / 9
-              )}°C`;
-            }
-          });
-        });
+        if (tempUnitToggle) {
+            tempUnitToggle.addEventListener("change", () => {
+              const isFahrenheit = tempUnitToggle.checked;
+              // Convert all temperature displays
+              const temps = document.querySelectorAll(".temperature, .feels-like"); // Thêm .feels-like nếu muốn đổi cả nó
+              temps.forEach((tempElement) => {
+                // Cần trích xuất số từ chuỗi phức tạp hơn nếu có cả text, ví dụ "Cảm giác như 20°C"
+                const tempText = tempElement.textContent;
+                const currentTempMatch = tempText.match(/-?\d+(\.\d+)?/); // Trích xuất số
+                if (currentTempMatch) {
+                    const currentTemp = parseFloat(currentTempMatch[0]);
+                    let newTempText;
+                    if (isFahrenheit) {
+                      newTempText = `${Math.round((currentTemp * 9) / 5 + 32)}°F`;
+                    } else {
+                      newTempText = `${Math.round(((currentTemp - 32) * 5) / 9)}°C`;
+                    }
+                    // Cập nhật lại, giữ nguyên phần text nếu có (ví dụ "Cảm giác như ")
+                    if (tempElement.classList.contains('feels-like')) {
+                        tempElement.textContent = `Cảm giác như ${newTempText}`;
+                    } else {
+                        tempElement.textContent = newTempText;
+                    }
+                }
+              });
+            });
+        } else {
+            console.warn("Element with ID 'tempUnitToggle' not found.");
+        }
 
         // Language selection
         const languageSelect = document.getElementById("languageSelect");
-        languageSelect.addEventListener("change", (e) => {
-          const lang = e.target.value;
-          // Implement language change logic here
-          // You'll need to store translations and update UI text
-        });
+        if (languageSelect) {
+            languageSelect.addEventListener("change", (e) => {
+              const lang = e.target.value;
+              // Implement language change logic here
+              console.log(`Language selected: ${lang}. Implement I18N.`);
+            });
+        } else {
+            console.warn("Element with ID 'languageSelect' not found.");
+        }
       });
+      const loginTriggerLink = document.getElementById("loginTriggerLink");
+      const loginModalElement = document.getElementById("loginModal");
+      const closeModalButton = loginModalElement ? loginModalElement.querySelector(".modal-close-button") : null;
+
+      const loginView = document.getElementById('loginView');
+      const registerView = document.getElementById('registerView');
+      const showRegisterViewLink = document.getElementById('showRegisterViewLink');
+      const showLoginViewLink = document.getElementById('showLoginViewLink');
+
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const googleLoginButton = document.getElementById('googleLoginButton');
+
+      // Gắn sự kiện mở modal cho liên kết "Đăng nhập"
+      if (loginTriggerLink && loginModalElement) {
+        loginTriggerLink.addEventListener("click", (event) => {
+          event.preventDefault(); // Ngăn hành vi mặc định của thẻ <a>
+          loginModalElement.style.display = "flex";
+          // Mặc định hiển thị form đăng nhập khi mở modal
+          if(loginView) loginView.style.display = 'block';
+          if(registerView) registerView.style.display = 'none';
+        });
+      }
+
+      // Gắn sự kiện đóng modal cho nút "x"
+      if (closeModalButton && loginModalElement) {
+        closeModalButton.addEventListener("click", () => {
+          loginModalElement.style.display = "none";
+        });
+      }
+
+      // Gắn sự kiện đóng modal khi click ra ngoài nội dung modal
+      if (loginModalElement) {
+        loginModalElement.addEventListener("click", (event) => {
+          // Chỉ đóng modal nếu nhấp vào lớp phủ (overlay) bên ngoài modal-content
+          if (event.target === loginModalElement) {
+            loginModalElement.style.display = "none";
+          }
+        });
+      }
+
+      // Logic chuyển đổi giữa các form Đăng nhập và Đăng ký
+      if (showRegisterViewLink && loginView && registerView) {
+        showRegisterViewLink.addEventListener('click', (event) => {
+          event.preventDefault();
+          loginView.style.display = 'none';
+          registerView.style.display = 'block';
+        });
+      }
+
+      if (showLoginViewLink && loginView && registerView) {
+        showLoginViewLink.addEventListener('click', (event) => {
+          event.preventDefault();
+          registerView.style.display = 'none';
+          loginView.style.display = 'block';
+        });
+      }
+
+      // Xử lý submit form Đăng nhập (hiện tại chỉ là placeholder)
+      if (loginForm) {
+        loginForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const email = document.getElementById('loginEmail').value;
+          // const password = document.getElementById('loginPassword').value; // Lấy mật khẩu nếu cần
+          alert(`Đăng nhập với Email: ${email}. (Chức năng đang phát triển)`);
+          // Thêm logic xử lý đăng nhập ở đây (gửi dữ liệu đến backend)
+          // if (loginModalElement) loginModalElement.style.display = 'none'; // Tùy chọn: đóng modal sau khi submit
+        });
+      }
+
+      // Xử lý submit form Đăng ký (hiện tại chỉ là placeholder)
+      if (registerForm) {
+        registerForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const email = document.getElementById('registerEmail').value;
+          const password = document.getElementById('registerPassword').value;
+          const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+          if (password !== confirmPassword) {
+            alert('Mật khẩu xác nhận không khớp!');
+            return;
+          }
+          alert(`Đăng ký với Email: ${email}. (Chức năng đang phát triển)`);
+          // Thêm logic xử lý đăng ký ở đây (gửi dữ liệu đến backend)
+          // if (loginModalElement) loginModalElement.style.display = 'none'; // Tùy chọn: đóng modal sau khi submit
+        });
+      }
+
+      // Xử lý nút Đăng nhập với Google (hiện tại chỉ là placeholder)
+      if (googleLoginButton) {
+        googleLoginButton.addEventListener("click", () => {
+          console.log('Nút "Đăng nhập với Google" đã được nhấp!');
+          alert(
+            "Chức năng đăng nhập bằng Google sẽ được tích hợp tại đây. Hiện tại, đây chỉ là giao diện mẫu."
+          );
+          // if (loginModalElement) loginModalElement.style.display = 'none'; // Tùy chọn: đóng modal sau khi nhấp
+        });
+      }
