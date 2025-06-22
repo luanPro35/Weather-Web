@@ -2,7 +2,7 @@
 let favoriteCities = [];
 let isLoading = false;
 const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Your API key
-const DEFAULT_CITY_FOR_BACKGROUND = "Da Nang"; // Default city for page background
+const DEFAULT_CITY_FOR_BACKGROUND = "Da Nang"; // Fallback default city for page background
 
 // Navigation functions (should be shared or present in each file if not shared)
 function toggleMobileMenu() {
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadFavoriteCities();
     setupEventListeners();
     updateDisplay();
-    fetchWeatherForBackground(DEFAULT_CITY_FOR_BACKGROUND); // Set initial page background
+    loadBackgroundBasedOnLocation(DEFAULT_CITY_FOR_BACKGROUND); // Set initial page background
 });
 
 // Setup event listeners

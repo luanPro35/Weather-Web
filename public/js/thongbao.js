@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const NOTIFICATION_SETTINGS_KEY = "weatherNotificationSettings";
     const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Sử dụng lại API key của bạn
-    const DEFAULT_CITY_FOR_BACKGROUND = "Da Nang"; // Thành phố mặc định cho nền trang này
+    const DEFAULT_CITY_FOR_BACKGROUND = "Da Nang"; // Fallback default city for this page's background
 
     // Navigation functions (should be shared or present in each file if not shared)
     function toggleMobileMenu() {
@@ -90,6 +90,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (newWeatherClass) {
             body.classList.add(newWeatherClass);
+        }
+    }
+
+    // New function to get city name from coordinates using OpenWeatherMap Geocoding API
+    async function getCityFromCoordinates(lat, lon, apiKey) {
+        try {
+            const response = await fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${apiKey}`);
+            if (!response.ok) {
+                console.error("Failed to reverse geocode coordinates.");
+                return null;
+            }
+            const data = await response.json();
+            if (data && data.length > 0) {
+                return data[0].name; // Return the city name
+            }
+            return null;
+        } catch (error) {
+            console.error("Error during reverse geocoding:", error);
+            return null;
+        }
+    }
+
+    // Function to get user's current location and fetch weather for background
+    async function loadBackgroundBasedOnLocation(fallbackCity) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const cityName = await getCityFromCoordinates(lat, lon, API_KEY);
+                if (cityName) {
+                    console.log(`Detected location for background: ${cityName}. Fetching weather.`);
+                    fetchWeatherForBackground(cityName);
+                } else {
+                    console.warn(`Could not determine city from coordinates for background. Falling back to ${fallbackCity}.`);
+                    fetchWeatherForBackground(fallbackCity);
+                }
+            }, (error) => {
+                console.warn(`Geolocation failed for background: ${error.message}. Falling back to ${fallbackCity}.`);
+                fetchWeatherForBackground(fallbackCity);
+            }, { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 });
+        } else {
+            console.warn(`Geolocation is not supported by this browser for background. Falling back to ${fallbackCity}.`);
+            fetchWeatherForBackground(fallbackCity);
         }
     }
 
@@ -232,7 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const notificationsNavLink = Array.from(document.querySelectorAll('.nav-link')).find(link => link.textContent.trim().includes('Thông báo'));
     if (notificationsNavLink) showSection('notificationsPage', notificationsNavLink);
 
-    fetchWeatherForBackground(DEFAULT_CITY_FOR_BACKGROUND);
+    loadBackgroundBasedOnLocation(DEFAULT_CITY_FOR_BACKGROUND);
 
     // Hàm toggleMobileMenu (nếu cần, tương tự thanhpho.js)
     // toggleMobileMenu is defined above and made global.

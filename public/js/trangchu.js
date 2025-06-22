@@ -1,6 +1,6 @@
 const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của bạn
-      const DEFAULT_CITY = "Da Nang";
-
+      const DEFAULT_CITY = "Da Nang"; // Fallback default city
+      
       // Weather icons mapping
       const weatherIcons = {
         "01d": "☀️",
@@ -265,6 +265,81 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
         weatherContent.innerHTML = html;
       }
 
+      // Bộ chuyển đổi tên Tỉnh sang Thành phố để API dễ nhận dạng hơn
+      // Bao gồm tất cả 63 tỉnh thành và các tên gọi phổ biến.
+      const provinceToCityMap = {
+        // Miền Bắc
+        'hà giang': 'Hà Giang', 'ha giang': 'Hà Giang',
+        'cao bằng': 'Cao Bằng', 'cao bang': 'Cao Bằng',
+        'bắc kạn': 'Bắc Kạn', 'bac kan': 'Bắc Kạn',
+        'lạng sơn': 'Lạng Sơn', 'lang son': 'Lạng Sơn',
+        'tuyên quang': 'Tuyên Quang', 'tuyen quang': 'Tuyên Quang',
+        'thái nguyên': 'Thái Nguyên', 'thai nguyen': 'Thái Nguyên',
+        'phú thọ': 'Việt Trì', 'phu tho': 'Việt Trì',
+        'bắc giang': 'Bắc Giang', 'bac giang': 'Bắc Giang',
+        'quảng ninh': 'Hạ Long', 'quang ninh': 'Hạ Long',
+        'lào cai': 'Lào Cai', 'lao cai': 'Lào Cai',
+        'yên bái': 'Yên Bái', 'yen bai': 'Yên Bái',
+        'điện biên': 'Điện Biên Phủ', 'dien bien': 'Điện Biên Phủ',
+        'hòa bình': 'Hòa Bình', 'hoa binh': 'Hòa Bình',
+        'lai châu': 'Lai Châu', 'lai chau': 'Lai Châu',
+        'sơn la': 'Sơn La', 'son la': 'Sơn La',
+        'bắc ninh': 'Bắc Ninh', 'bac ninh': 'Bắc Ninh',
+        'hà nam': 'Phủ Lý', 'ha nam': 'Phủ Lý',
+        'hải dương': 'Hải Dương', 'hai duong': 'Hải Dương',
+        'hưng yên': 'Hưng Yên', 'hung yen': 'Hưng Yên',
+        'nam định': 'Nam Định', 'nam dinh': 'Nam Định',
+        'ninh bình': 'Ninh Bình', 'ninh binh': 'Ninh Bình',
+        'thái bình': 'Thái Bình', 'thai binh': 'Thái Bình',
+        'vĩnh phúc': 'Vĩnh Yên', 'vinh phuc': 'Vĩnh Yên',
+        'hà nội': 'Hà Nội', 'ha noi': 'Hà Nội',
+        'hải phòng': 'Hải Phòng', 'hai phong': 'Hải Phòng',
+    
+        // Miền Trung
+        'thanh hóa': 'Thanh Hóa', 'thanh hoa': 'Thanh Hóa',
+        'nghệ an': 'Vinh', 'nghe an': 'Vinh',
+        'hà tĩnh': 'Hà Tĩnh', 'ha tinh': 'Hà Tĩnh',
+        'quảng bình': 'Đồng Hới', 'quang binh': 'Đồng Hới',
+        'quảng trị': 'Đông Hà', 'quang tri': 'Đông Hà',
+        'thừa thiên huế': 'Huế', 'thua thien hue': 'Huế',
+        'đà nẵng': 'Đà Nẵng', 'da nang': 'Đà Nẵng',
+        'quảng nam': 'Tam Kỳ', 'quang nam': 'Tam Kỳ',
+        'quảng ngãi': 'Quảng Ngãi', 'quang ngai': 'Quảng Ngãi',
+        'bình định': 'Quy Nhơn', 'binh dinh': 'Quy Nhơn',
+        'phú yên': 'Tuy Hòa', 'phu yen': 'Tuy Hòa',
+        'khánh hòa': 'Nha Trang', 'khanh hoa': 'Nha Trang',
+        'ninh thuận': 'Phan Rang-Tháp Chàm', 'ninh thuan': 'Phan Rang-Tháp Chàm', 'phan rang': 'Phan Rang-Tháp Chàm',
+        'bình thuận': 'Phan Thiết', 'binh thuan': 'Phan Thiết',
+        'kon tum': 'Kon Tum',
+        'gia lai': 'Pleiku',
+        'đắk lắk': 'Buôn Ma Thuột', 'dak lak': 'Buôn Ma Thuột', 'bmt': 'Buôn Ma Thuột',
+        'đắk nông': 'Gia Nghĩa', 'dak nong': 'Gia Nghĩa',
+        'lâm đồng': 'Đà Lạt', 'lam dong': 'Đà Lạt',
+    
+        // Miền Nam
+        'bình phước': 'Đồng Xoài', 'binh phuoc': 'Đồng Xoài',
+        'bình dương': 'Thủ Dầu Một', 'binh duong': 'Thủ Dầu Một',
+        'đồng nai': 'Biên Hòa', 'dong nai': 'Biên Hòa',
+        'tây ninh': 'Tây Ninh', 'tay ninh': 'Tây Ninh',
+        'bà rịa vũng tàu': 'Vũng Tàu',
+        'ba ria vung tau': 'Vũng Tàu',
+        'brvt': 'Vũng Tàu',
+        'hồ chí minh': 'Ho Chi Minh City', 'ho chi minh city': 'Ho Chi Minh City', 'hcm': 'Ho Chi Minh City', 'tp hcm': 'Ho Chi Minh City', 'sài gòn': 'Ho Chi Minh City', 'sai gon': 'Ho Chi Minh City',
+        'long an': 'Tân An',
+        'đồng tháp': 'Cao Lãnh', 'dong thap': 'Cao Lãnh',
+        'tiền giang': 'Mỹ Tho', 'tien giang': 'Mỹ Tho',
+        'an giang': 'Long Xuyên',
+        'bến tre': 'Bến Tre', 'ben tre': 'Bến Tre',
+        'vĩnh long': 'Vĩnh Long', 'vinh long': 'Vĩnh Long',
+        'trà vinh': 'Trà Vinh', 'tra vinh': 'Trà Vinh',
+        'hậu giang': 'Vị Thanh', 'hau giang': 'Vị Thanh',
+        'kiên giang': 'Rạch Giá', 'kien giang': 'Rạch Giá',
+        'sóc trăng': 'Sóc Trăng', 'soc trang': 'Sóc Trăng',
+        'bạc liêu': 'Bạc Liêu', 'bac lieu': 'Bạc Liêu',
+        'cà mau': 'Cà Mau', 'ca mau': 'Cà Mau',
+        'cần thơ': 'Cần Thơ', 'can tho': 'Cần Thơ'
+      };
+
       // Fetch weather data
       async function getWeather(city) {
         const weatherContent = document.getElementById("weatherContent");
@@ -279,9 +354,17 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
           </div>
         `;
 
+        // Chuyển đổi tên tỉnh thành thành phố nếu có trong bản đồ
+        let searchCity = city.toLowerCase().trim();
+        const mappedCity = provinceToCityMap[searchCity];
+        if (mappedCity) {
+            console.log(`Ánh xạ "${city}" sang "${mappedCity}" để gọi API.`);
+            searchCity = mappedCity;
+        }
+
         try {
           const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=vi&appid=${API_KEY}`
+            `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(searchCity)}&units=metric&lang=vi&appid=${API_KEY}`
           );
 
           if (!response.ok) {
@@ -302,9 +385,52 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
         }
       }
 
+      // New function to get city name from coordinates using OpenWeatherMap Geocoding API
+      async function getCityFromCoordinates(lat, lon, apiKey) {
+          try {
+              const response = await fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${apiKey}`);
+              if (!response.ok) {
+                  console.error("Failed to reverse geocode coordinates.");
+                  return null;
+              }
+              const data = await response.json();
+              if (data && data.length > 0) {
+                  return data[0].name; // Return the city name
+              }
+              return null;
+          } catch (error) {
+              console.error("Error during reverse geocoding:", error);
+              return null;
+          }
+      }
+
+      // Function to get user's current location and fetch weather
+      async function loadWeatherBasedOnLocation(defaultCity, apiKey, weatherFetchFunction) {
+          if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(async (position) => {
+                  const lat = position.coords.latitude;
+                  const lon = position.coords.longitude;
+                  const cityName = await getCityFromCoordinates(lat, lon, apiKey);
+                  if (cityName) {
+                      console.log(`Detected location: ${cityName}. Fetching weather.`);
+                      weatherFetchFunction(cityName);
+                  } else {
+                      console.warn(`Could not determine city from coordinates. Falling back to ${defaultCity}.`);
+                      weatherFetchFunction(defaultCity);
+                  }
+              }, (error) => {
+                  console.warn(`Geolocation failed: ${error.message}. Falling back to ${defaultCity}.`);
+                  weatherFetchFunction(defaultCity);
+              }, { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 });
+          } else {
+              console.warn(`Geolocation is not supported by this browser. Falling back to ${defaultCity}.`);
+              weatherFetchFunction(defaultCity);
+          }
+      }
+
       // Event listeners
       document.addEventListener("DOMContentLoaded", () => {
-        getWeather(DEFAULT_CITY);
+        loadWeatherBasedOnLocation(DEFAULT_CITY, API_KEY, getWeather);
 
         // Set active link for current page
         const homeNavLink = Array.from(document.querySelectorAll('.nav-link')).find(link => link.href.includes('trangchu.html') || link.textContent.trim() === 'Trang chủ');
@@ -312,14 +438,27 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
 
 
         const cityInput = document.getElementById("cityInput");
+        const searchIcon = document.querySelector(".search-icon"); // Lấy icon tìm kiếm
+
+        // Hàm xử lý tìm kiếm để tránh lặp code
+        function handleSearch() {
+            if (cityInput && cityInput.value.trim()) {
+                getWeather(cityInput.value.trim());
+            }
+        }
+
         if (cityInput) {
             cityInput.addEventListener("keypress", (e) => {
-              if (e.key === "Enter" && cityInput.value.trim()) {
-                getWeather(cityInput.value.trim());
+              if (e.key === "Enter") {
+                handleSearch();
               }
             });
         } else {
             console.warn("Element with ID 'cityInput' not found.");
+        }
+
+        if (searchIcon) {
+            searchIcon.addEventListener("click", handleSearch);
         }
 
         // Temperature unit toggle
