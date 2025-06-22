@@ -29,39 +29,6 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
         navMenu.classList.toggle("active");
       }
 
-      function showSection(sectionName, navLinkElement) {
-        // Hide all sections
-        const sections = document.querySelectorAll(".section");
-        sections.forEach((section) => {
-          section.style.display = "none";
-        });
-
-        // Show selected section
-        const targetSection = document.getElementById(sectionName + "Section");
-        if (targetSection) {
-            targetSection.style.display = "block";
-        } else {
-            // Nếu bạn đang ở trang khác (ví dụ dubao.html) và gọi showSection từ trang đó,
-            // section có thể không tồn tại. Điều này là bình thường nếu hàm này được dùng chung.
-            console.warn(`Section with ID '${sectionName}Section' not found on the current page.`);
-        }
-
-        // Update active nav link
-        const navLinks = document.querySelectorAll(".nav-link");
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-        });
-        if (navLinkElement) { // Chỉ thêm class active nếu navLinkElement được cung cấp
-            navLinkElement.classList.add("active");
-        }
-
-        // Close mobile menu
-        const mobileMenu = document.getElementById("navMenu");
-        if (mobileMenu) {
-            mobileMenu.classList.remove("active");
-        }
-      }
-
       // Smart suggestions based on weather
       function getWeatherSuggestions(weather, temp, humidity, windSpeed) {
         const suggestions = [];
@@ -432,10 +399,14 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
       document.addEventListener("DOMContentLoaded", () => {
         loadWeatherBasedOnLocation(DEFAULT_CITY, API_KEY, getWeather);
 
-        // Set active link for current page
-        const homeNavLink = Array.from(document.querySelectorAll('.nav-link')).find(link => link.href.includes('trangchu.html') || link.textContent.trim() === 'Trang chủ');
-        if (homeNavLink) showSection('home', homeNavLink);
-
+        // Set active link for current page based on URL
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            if (link.href.includes(currentPath.split('/').pop())) { // Compare last part of path
+                link.classList.add('active');
+            }
+        });
 
         const cityInput = document.getElementById("cityInput");
         const searchIcon = document.querySelector(".search-icon"); // Lấy icon tìm kiếm

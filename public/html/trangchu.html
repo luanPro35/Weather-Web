@@ -22,11 +22,7 @@
       </button>
       <ul class="nav-menu" id="navMenu">
         <li class="nav-item">
-          <a
-            href="../html/trangchu.html"
-            class="nav-link active"
-            onclick="showSection('home', this)"
-          >
+          <a href="../html/trangchu.html" class="nav-link active">
             <i class="fas fa-home"></i> Trang chủ
           </a>
         </li>
@@ -46,7 +42,6 @@
           </a>
         </li>
         <li class="nav-item">
-          <!-- Thay đổi href nếu đường dẫn đến thư mục PHP của bạn khác -->
           <a class="nav-link" href="#" id="loginTriggerLink">
             <i class="fas fa-sign-in-alt"></i> Đăng nhập
           </a>
@@ -78,31 +73,19 @@
     </nav>
 
     <div class="container">
-      <!-- Home Section -->
-      <div id="homeSection" class="section">
-        <div class="search-container">
-          <div class="search-wrapper">
-            <input
-              type="text"
-              id="cityInput"
-              class="search-box"
-              placeholder="Nhập tên thành phố..."
-            />
-            <i class="fas fa-search search-icon"></i>
-          </div>
+      <div class="search-container">
+        <div class="search-wrapper">
+          <input
+            type="text"
+            id="cityInput"
+            class="search-box"
+            placeholder="Nhập tên thành phố..."
+          />
+          <i class="fas fa-search search-icon"></i>
         </div>
-
-        <div id="weatherContent"></div>
       </div>
 
-      <!-- Empty sections for other pages -->
-      <div id="forecastSection" class="section" style="display: none"></div>
-      <div id="citiesSection" class="section" style="display: none"></div>
-      <div
-        id="notificationsSection"
-        class="section"
-        style="display: none"
-      ></div>
+      <div id="weatherContent"></div>
     </div>
 
     <!-- Khung Đăng nhập (Modal) -->

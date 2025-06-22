@@ -41,6 +41,11 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" href="#" id="loginTriggerLink">
+            <i class="fas fa-sign-in-alt"></i> Đăng nhập
+          </a>
+        </li>
+        <li class="nav-item">
           <div class="settings-dropdown">
             <button class="settings-btn">
               <i class="fas fa-cog"></i>
@@ -103,6 +108,88 @@
           </div>
         </div>
       </section>
+    </div>
+    <!-- Khung Đăng nhập (Modal) -->
+    <div id="loginModal" class="modal-overlay">
+      <div class="modal-content">
+        <span class="modal-close-button">&times;</span>
+
+        <!-- Login View -->
+        <div id="loginView">
+          <h2>Đăng nhập</h2>
+          <p>Chào mừng bạn trở lại!</p>
+          <form id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Email" required />
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Mật khẩu"
+              required
+            />
+            <button type="submit" class="form-button">Đăng nhập</button>
+          </form>
+          <div class="or-divider"><span>HOẶC</span></div>
+          <button id="googleLoginButton" class="google-signin-button">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill="#4285F4"
+                d="M17.64 9.20455c0-.63818-.05727-1.25182-.16364-1.84091H9v3.48182h4.84364c-.20455 1.125-.82091 2.07818-1.73637 2.72182v2.25818h2.90727c1.70182-1.56682 2.68363-3.87545 2.68363-6.62091z"
+              />
+              <path
+                fill="#34A853"
+                d="M9 18c2.43 0 4.46727-.80545 5.95636-2.18182l-2.90727-2.25818c-.80545.54364-1.84091.87273-3.04909.87273-2.34546 0-4.32546-1.58182-5.03727-3.71091H.957273v2.33181C2.43818 16.13318 5.48182 18 9 18z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M3.962727 10.71c-.181818-.54364-.286363-1.125-.286363-1.71s.104545-1.16636.286363-1.71V4.958181H.957273C.347727 6.173181 0 7.547727 0 9s.347727 2.826819.957273 4.041819l3.005454-2.331819z"
+              />
+              <path
+                fill="#EA4335"
+                d="M9 3.57818c1.32273 0 2.50727.46182 3.44091 1.34545l2.58545-2.58545C13.46364.891818 11.42591 0 9 0 5.48182 0 2.43818 1.866819.957273 4.958181l3.005454 2.33091C4.674545 5.16 6.654545 3.57818 9 3.57818z"
+              />
+            </svg>
+            Đăng nhập với Google
+          </button>
+          <p class="toggle-form-text">
+            Chưa có tài khoản? <a href="#" id="showRegisterViewLink">Đăng ký</a>
+          </p>
+        </div>
+
+        <!-- Register View -->
+        <div id="registerView" style="display: none">
+          <h2>Đăng ký</h2>
+          <p>Tạo tài khoản mới để trải nghiệm đầy đủ.</p>
+          <form id="registerForm">
+            <input
+              type="email"
+              id="registerEmail"
+              placeholder="Email"
+              required
+            />
+            <input
+              type="password"
+              id="registerPassword"
+              placeholder="Mật khẩu (ít nhất 6 ký tự)"
+              required
+            />
+            <input
+              type="password"
+              id="registerConfirmPassword"
+              placeholder="Xác nhận mật khẩu"
+              required
+            />
+            <button type="submit" class="form-button">Đăng ký</button>
+          </form>
+          <p class="toggle-form-text">
+            Đã có tài khoản? <a href="#" id="showLoginViewLink">Đăng nhập</a>
+          </p>
+        </div>
+      </div>
     </div>
     <script src="../js/thanhpho.js"></script>
   </body>

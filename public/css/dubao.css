@@ -855,6 +855,8 @@ input:checked+.slider:before {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 25px;
+    margin-left: -90px;
+
 }
 
 .forecast-main-column {

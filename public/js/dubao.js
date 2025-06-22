@@ -550,11 +550,6 @@ async function loadWeatherBasedOnLocation(defaultCity, apiKey, weatherFetchFunct
 
 // Event listeners
 document.addEventListener("DOMContentLoaded", () => {
-  // Set active link for current page (Forecast page)
-  // Show 'forecast' section by default and activate 'Dự báo' link
-  const forecastNavLink = Array.from(document.querySelectorAll('.nav-link')).find(link => link.textContent.trim().includes('Dự báo'));
-  if (forecastNavLink) showSection('forecast', forecastNavLink);
-
 
   const urlParams = new URLSearchParams(window.location.search);
   const cityFromQuery = urlParams.get('city');
@@ -607,6 +602,84 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log(`Language changed to: ${lang}. Implement I18N.`);
       // Implement language change logic here
       // This would involve reloading data with new lang param or using a translation library.
+    });
+  }
+
+  // --- Login Modal Logic ---
+  const loginTriggerLink = document.getElementById("loginTriggerLink");
+  const loginModalElement = document.getElementById("loginModal");
+  const closeModalButton = loginModalElement ? loginModalElement.querySelector(".modal-close-button") : null;
+
+  const loginView = document.getElementById('loginView');
+  const registerView = document.getElementById('registerView');
+  const showRegisterViewLink = document.getElementById('showRegisterViewLink');
+  const showLoginViewLink = document.getElementById('showLoginViewLink');
+
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const googleLoginButton = document.getElementById('googleLoginButton');
+
+  // Gắn sự kiện mở modal cho liên kết "Đăng nhập"
+  if (loginTriggerLink && loginModalElement) {
+    loginTriggerLink.addEventListener("click", (event) => {
+      event.preventDefault(); // Ngăn hành vi mặc định của thẻ <a>
+      loginModalElement.style.display = "flex";
+      // Mặc định hiển thị form đăng nhập khi mở modal
+      if(loginView) loginView.style.display = 'block';
+      if(registerView) registerView.style.display = 'none';
+    });
+  }
+
+  // Gắn sự kiện đóng modal cho nút "x"
+  if (closeModalButton && loginModalElement) {
+    closeModalButton.addEventListener("click", () => {
+      loginModalElement.style.display = "none";
+    });
+  }
+
+  // Gắn sự kiện đóng modal khi click ra ngoài nội dung modal
+  if (loginModalElement) {
+    loginModalElement.addEventListener("click", (event) => {
+      // Chỉ đóng modal nếu nhấp vào lớp phủ (overlay) bên ngoài modal-content
+      if (event.target === loginModalElement) {
+        loginModalElement.style.display = "none";
+      }
+    });
+  }
+
+  // Logic chuyển đổi giữa các form Đăng nhập và Đăng ký
+  if (showRegisterViewLink && loginView && registerView) {
+    showRegisterViewLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      loginView.style.display = 'none';
+      registerView.style.display = 'block';
+    });
+  }
+
+  if (showLoginViewLink && loginView && registerView) {
+    showLoginViewLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      registerView.style.display = 'none';
+      loginView.style.display = 'block';
+    });
+  }
+
+  // Xử lý submit form (hiện tại chỉ là placeholder)
+  if (loginForm) {
+    loginForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      alert('Chức năng đăng nhập đang được phát triển.');
+    });
+  }
+  if (registerForm) {
+    registerForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      alert('Chức năng đăng ký đang được phát triển.');
+    });
+  }
+  if (googleLoginButton) {
+    googleLoginButton.addEventListener("click", () => {
+      alert("Chức năng đăng nhập bằng Google đang được phát triển.");
     });
   }
 });
