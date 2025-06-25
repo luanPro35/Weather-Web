@@ -28,32 +28,28 @@
         <li class="nav-item">
           <a
             href="#"
-            class="nav-link active"
-            onclick="showSection('home', this)"
+            class="nav-link"
+            onclick="showSection('home', this); return false;"
           >
             <i class="fas fa-home"></i> Trang chủ
           </a>
         </li>
         <li class="nav-item">
-          <a href="#" class="nav-link" onclick="showSection('forecast', this)">
+          <a
+            href="#"
+            class="nav-link"
+            onclick="showSection('forecast', this); return false;"
+          >
             <i class="fas fa-calendar-alt"></i> Dự báo
           </a>
         </li>
         <li class="nav-item">
-          <a
-            href="../html/thanhpho.html"
-            class="nav-link"
-            onclick="showSection('cities', this)"
-          >
+          <a href="../html/thanhpho.html" class="nav-link">
             <i class="fas fa-city"></i> Thành phố
           </a>
         </li>
         <li class="nav-item">
-          <a
-            href="../html/thongbao.html"
-            class="nav-link"
-            onclick="showSection('notifications', this)"
-          >
+          <a href="../html/thongbao.html" class="nav-link">
             <i class="fas fa-bell"></i> Thông báo
           </a>
         </li>
@@ -165,5 +161,35 @@
       </section>
     </div>
     <script src="../js/dubao.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Hàm này giả định rằng bạn đã có hàm showSection(sectionId, element)
+        // được định nghĩa trong dubao.js.
+        const handleHashChange = () => {
+          const hash = window.location.hash;
+          let sectionId = "home"; // Mặc định là trang chủ
+
+          if (hash) {
+            // Lấy sectionId từ hash (ví dụ: #forecast -> forecast)
+            const potentialSectionId = hash.substring(1);
+            if (document.getElementById(potentialSectionId + "Section")) {
+              sectionId = potentialSectionId;
+            }
+          }
+
+          // Tìm nav-link tương ứng để tô sáng
+          const navLink = document.querySelector(
+            `.nav-link[onclick*="showSection('${sectionId}'"]`
+          );
+
+          if (typeof showSection === "function" && navLink) {
+            showSection(sectionId, navLink);
+          }
+        };
+
+        // Xử lý khi tải trang lần đầu
+        handleHashChange();
+      });
+    </script>
   </body>
 </html>

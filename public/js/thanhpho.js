@@ -4,6 +4,73 @@ let isLoading = false;
 const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Your API key
 const DEFAULT_CITY_FOR_BACKGROUND = "Da Nang"; // Fallback default city for page background
 
+// Updated to use a prominent city within the province for better API recognition
+const vietnameseProvinces = [
+    { name: "An Giang", query: "Long Xuyen" },
+    { name: "Bà Rịa - Vũng Tàu", query: "Vung Tau" },
+    { name: "Bắc Giang", query: "Bac Giang" },
+    { name: "Bắc Kạn", query: "Bac Kan" },
+    { name: "Bạc Liêu", query: "Bac Lieu" },
+    { name: "Bắc Ninh", query: "Bac Ninh" },
+    { name: "Bến Tre", query: "Ben Tre" },
+    { name: "Bình Định", query: "Quy Nhon" },
+    { name: "Bình Dương", query: "Thu Dau Mot" },
+    { name: "Bình Phước", query: "Dong Xoai" },
+    { name: "Bình Thuận", query: "Phan Thiet" },
+    { name: "Cà Mau", query: "Ca Mau" },
+    { name: "Cần Thơ", query: "Can Tho" },
+    { name: "Cao Bằng", query: "Cao Bang" },
+    { name: "Đà Nẵng", query: "Da Nang" },
+    { name: "Đắk Lắk", query: "Buon Ma Thuot" },
+    { name: "Đắk Nông", query: "Gia Nghia" },
+    { name: "Điện Biên", query: "Dien Bien Phu" },
+    { name: "Đồng Nai", query: "Bien Hoa" },
+    { name: "Đồng Tháp", query: "Cao Lanh" },
+    { name: "Gia Lai", query: "Pleiku" },
+    { name: "Hà Giang", query: "Ha Giang City" },
+    { name: "Hà Nam", query: "Phu Ly" },
+    { name: "Hà Nội", query: "Hanoi" },
+    { name: "Hà Tĩnh", query: "Ha Tinh" },
+    { name: "Hải Dương", query: "Hai Duong" },
+    { name: "Hải Phòng", query: "Haiphong" },
+    { name: "Hậu Giang", query: "Vi Thanh" },
+    { name: "Hòa Bình", query: "Hoa Binh City" },
+    { name: "Hưng Yên", query: "Hung Yen City" },
+    { name: "Khánh Hòa", query: "Nha Trang" },
+    { name: "Kiên Giang", query: "Rach Gia" },
+    { name: "Kon Tum", query: "Kon Tum City" },
+    { name: "Lai Châu", query: "Lai Chau City" },
+    { name: "Lâm Đồng", query: "Da Lat" },
+    { name: "Lạng Sơn", query: "Lang Son City" },
+    { name: "Lào Cai", query: "Lao Cai City" },
+    { name: "Long An", query: "Tan An" },
+    { name: "Nam Định", query: "Nam Dinh City" },
+    { name: "Nghệ An", query: "Vinh" },
+    { name: "Ninh Bình", query: "Ninh Binh City" },
+    { name: "Ninh Thuận", query: "Phan Rang-Thap Cham" },
+    { name: "Phú Thọ", query: "Viet Tri" },
+    { name: "Phú Yên", query: "Tuy Hoa" },
+    { name: "Quảng Bình", query: "Dong Hoi" },
+    { name: "Quảng Nam", query: "Tam Ky" },
+    { name: "Quảng Ngãi", query: "Quang Ngai City" },
+    { name: "Quảng Ninh", query: "Ha Long" },
+    { name: "Quảng Trị", query: "Dong Ha" },
+    { name: "Sóc Trăng", query: "Soc Trang City" },
+    { name: "Sơn La", query: "Son La City" },
+    { name: "Tây Ninh", query: "Tay Ninh City" },
+    { name: "Thái Bình", query: "Thai Binh City" },
+    { name: "Thái Nguyên", query: "Thai Nguyen City" },
+    { name: "Thanh Hóa", query: "Thanh Hoa City" }, // Changed to a more specific city query
+    { name: "Thừa Thiên Huế", query: "Hue" },
+    { name: "Tiền Giang", query: "My Tho" },
+    { name: "TP. Hồ Chí Minh", query: "Ho Chi Minh City" },
+    { name: "Trà Vinh", query: "Tra Vinh City" },
+    { name: "Tuyên Quang", query: "Tuyen Quang City" },
+    { name: "Vĩnh Long", query: "Vinh Long City" },
+    { name: "Vĩnh Phúc", query: "Vinh Yen" },
+    { name: "Yên Bái", query: "Yen Bai City" }
+];
+
 // Navigation functions (should be shared or present in each file if not shared)
 function toggleMobileMenu() {
     const navMenu = document.getElementById("navMenu");
@@ -33,22 +100,6 @@ function showSection(sectionName, navLinkElement) {
         navLinkElement.classList.add("active");
     }
 }
-
-// Mock weather data for demonstration
-const mockWeatherData = {
-    // This will be used if actual API call fails or for cities not in OpenWeatherMap
-    // For a real app, you'd rely more on the API.
-    'hanoi': { temp: 28, condition: 'sunny', icon: '01d', description: 'Nắng đẹp' },
-    'ho chi minh': { temp: 32, condition: 'cloudy', icon: '02d', description: 'Có mây' },
-    'da nang': { temp: 30, condition: 'partly-cloudy', icon: '02d', description: 'Có mây' },
-    'hue': { temp: 26, condition: 'rainy', icon: '10d', description: 'Mưa nhẹ' },
-    'can tho': { temp: 31, condition: 'sunny', icon: '01d', description: 'Nắng' },
-    'nha trang': { temp: 29, condition: 'sunny', icon: '01d', description: 'Nắng đẹp' },
-    'dalat': { temp: 22, condition: 'cloudy', icon: '03d', description: 'Nhiều mây' },
-    'vung tau': { temp: 28, condition: 'windy', icon: '50d', description: 'Có gió' }, // Using mist icon for windy mock
-    'hai phong': { temp: 25, condition: 'rainy', icon: '10d', description: 'Mưa' },
-    'quy nhon': { temp: 30, condition: 'sunny', icon: '01d', description: 'Nắng' }
-};
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
@@ -150,6 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function setupEventListeners() {
     const addCityBtn = document.getElementById('addCityBtn');
     const newCityInput = document.getElementById('newCityInput');
+    const suggestionsWrapper = document.getElementById('suggestionsWrapper');
     const tempToggle = document.getElementById('tempUnitToggle');
 
     if (addCityBtn) addCityBtn.addEventListener('click', handleAddCity);
@@ -160,14 +212,27 @@ function setupEventListeners() {
             }
         });
         // Auto-suggest functionality (placeholder)
-        newCityInput.addEventListener('input', handleAutoSuggest);
+        newCityInput.addEventListener('input', () => handleAutoSuggest(newCityInput, suggestionsWrapper));
+        newCityInput.addEventListener('blur', () => {
+            // Delay hiding to allow click on suggestion item
+            setTimeout(() => {
+                if (suggestionsWrapper) {
+                    suggestionsWrapper.style.display = 'none';
+                }
+            }, 200);
+        });
     }
 
     if (tempToggle) {
         tempToggle.addEventListener('change', handleTempUnitChange);
     }
 }
-
+function clearSuggestions(suggestionsWrapper) {
+    if (suggestionsWrapper) {
+        suggestionsWrapper.innerHTML = '';
+        suggestionsWrapper.style.display = 'none';
+    }
+}
 // Load favorite cities from localStorage
 function loadFavoriteCities() {
     const stored = JSON.parse(localStorage.getItem('favoriteCities') || '[]');
@@ -192,81 +257,78 @@ function saveFavoriteCities() {
 // Handle adding a new city
 async function handleAddCity() {
     const input = document.getElementById('newCityInput');
-    const cityName = input.value.trim();
+    const queryName = input.dataset.query || input.value.trim();
+    const suggestionsWrapper = document.getElementById('suggestionsWrapper');
 
-    if (!cityName) {
+    if (!queryName) {
         showNotification('Vui lòng nhập tên thành phố!', 'error');
+        clearSuggestions(suggestionsWrapper);
         return;
     }
 
-    if (favoriteCities.some(city => city.name.toLowerCase() === cityName.toLowerCase())) {
-        showNotification('Thành phố này đã có trong danh sách!', 'error');
-        input.value = '';
-        return;
-    }
-
-    setLoading(true);
-
+    setLoading(true); // Hiển thị trạng thái tải
     try {
-        // Simulate API call delay (optional, remove for production)
-        // await new Promise(resolve => setTimeout(resolve, 1000));
-
-        const weatherData = await getWeatherData(cityName);
-
+        const weatherData = await getWeatherData(queryName);
         if (weatherData) {
+            // Use the canonical name from the API response for duplicate check
+            const canonicalCityName = weatherData.name;
+
+            if (favoriteCities.some(city => city.name.toLowerCase() === canonicalCityName.toLowerCase())) {
+                showNotification(`Thành phố "${canonicalCityName}" đã có trong danh sách!`, 'error');
+                input.value = '';
+                input.dataset.query = '';
+                return; // Exit after showing duplicate message
+            }
+
             const newCity = {
-                id: Date.now(),
-                name: capitalizeWords(cityName),
+                id: Date.now(), // Unique ID cho mỗi item thành phố
+                ...weatherData,
                 newlyAdded: true, // Flag for animation
-                ...weatherData, // Includes temp, condition, icon (API code), description
                 addedAt: new Date().toISOString()
             };
 
             favoriteCities.push(newCity);
             saveFavoriteCities();
             input.value = '';
-            updateDisplay(); // This will call renderCities
-            showNotification(`Đã thêm ${newCity.name} vào danh sách!`, 'success');
+            input.dataset.query = ''; // Clear the selected query
+            updateDisplay(); // Gọi renderCities để cập nhật giao diện
+            showNotification(`Đã thêm ${canonicalCityName} vào danh sách!`, 'success'); // Thông báo thành công
         } else {
-            showNotification('Không tìm thấy thông tin thời tiết cho thành phố này!', 'error');
+            // Nếu weatherData là null, có nghĩa là getWeatherData đã ném lỗi
+            // và lỗi đó đã được bắt ở đây. Chúng ta sẽ ném lại lỗi để hiển thị thông báo.
+            throw new Error(`Không tìm thấy thông tin thời tiết cho thành phố "${queryName}". Vui lòng thử lại.`);
         }
     } catch (error) {
-        showNotification('Có lỗi xảy ra khi thêm thành phố!', 'error');
+        showNotification(error.message, 'error'); // Hiển thị thông báo lỗi cụ thể từ getWeatherData
     } finally {
-        setLoading(false);
+        setLoading(false); // Tắt trạng thái tải
+        clearSuggestions(suggestionsWrapper); // Đảm bảo danh sách gợi ý được xóa
     }
 }
 
-// Get weather data (can be real API or mock)
+// Get weather data
 async function getWeatherData(cityName) {
-    const normalizedName = cityName.toLowerCase();
-    // Prioritize real API call
     try {
         const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(cityName)}&units=metric&lang=vi&appid=${API_KEY}`);
         if (!response.ok) {
-            // If API fails or city not found, try mock data
-            if (mockWeatherData[normalizedName]) {
-                console.warn(`API call failed for ${cityName}, using mock data.`);
-                return mockWeatherData[normalizedName];
+            const errorData = await response.json().catch(() => ({ message: 'Unknown error' })); // Cố gắng phân tích lỗi từ phản hồi API
+            if (response.status === 404) {
+                throw new Error(`Không tìm thấy thành phố "${cityName}". Vui lòng kiểm tra lại tên.`);
+            } else {
+                throw new Error(`Lỗi khi tải dữ liệu thời tiết: ${errorData.message || response.statusText}`);
             }
-            console.error(`Weather data not found for ${cityName} via API or mock.`);
-            return null; // Or throw an error
         }
         const data = await response.json();
         return {
+            name: data.name, // Quan trọng: sử dụng tên thành phố từ phản hồi API
             temp: Math.round(data.main.temp),
-            condition: data.weather[0].main.toLowerCase(), // e.g., 'clouds'
-            icon: data.weather[0].icon, // Store the OpenWeatherMap icon code
+            condition: data.weather[0].main.toLowerCase(), // Ví dụ: 'clouds'
+            icon: data.weather[0].icon, // Mã icon từ OpenWeatherMap
             description: data.weather[0].description
         };
     } catch (error) {
-        console.error(`Error fetching weather for ${cityName}:`, error);
-         // Fallback to mock data on error
-        if (mockWeatherData[normalizedName]) {
-            console.warn(`API call errored for ${cityName}, using mock data.`);
-            return mockWeatherData[normalizedName];
-        }
-        return null;
+        console.error(`Lỗi khi tải thời tiết cho ${cityName}:`, error);
+        throw error; // Ném lại lỗi để handleAddCity có thể bắt và hiển thị
     }
 }
 
@@ -445,9 +507,35 @@ function viewCityWeather(cityName) {
 window.viewCityWeather = viewCityWeather; // Make it global for onclick
 
 // Placeholder for auto-suggest
-function handleAutoSuggest() {
-    // console.log('Auto-suggest input:', this.value);
-    // Implement auto-suggestion logic here if needed
+function handleAutoSuggest(inputElement, suggestionsWrapper) {
+    const searchTerm = inputElement.value.toLowerCase();
+    suggestionsWrapper.innerHTML = '';
+
+    if (searchTerm.length < 1) {
+        suggestionsWrapper.style.display = 'none';
+        return;
+    }
+
+    const filteredProvinces = vietnameseProvinces.filter(province =>
+        province.name.toLowerCase().includes(searchTerm)
+    );
+
+    if (filteredProvinces.length > 0) {
+        filteredProvinces.forEach(province => {
+            const item = document.createElement('div');
+            item.classList.add('suggestion-item');
+            item.textContent = province.name;
+            item.addEventListener('mousedown', () => { // Use mousedown to fire before blur
+                inputElement.value = province.name;
+                inputElement.dataset.query = province.query; // Store the query-friendly name
+                suggestionsWrapper.style.display = 'none';
+            });
+            suggestionsWrapper.appendChild(item);
+        });
+        suggestionsWrapper.style.display = 'block';
+    } else {
+        suggestionsWrapper.style.display = 'none';
+    }
 }
 
 // Placeholder for temperature unit change
