@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Hàm áp dụng nền động (tương tự trangchu.js/dubao.js) ---
     function setDynamicBackground(weatherData) {
         const body = document.body;
-        const existingWeatherClasses = ['sunny', 'cloudy', 'rainy', 'snowy', 'stormy', 'clear-night', 'misty', 'hot'];
+        const existingWeatherClasses = ['sunny', 'cloudy', 'overcast', 'rainy', 'snowy', 'stormy', 'clear-night', 'cloudy-night', 'overcast-night', 'misty', 'hot'];
 
         existingWeatherClasses.forEach(cls => {
             if (body.classList.contains(cls)) {
@@ -58,34 +58,41 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        let newWeatherClass = ''; // Default to empty, so body's default CSS background applies if no match
+
         if (!weatherData || !weatherData.weather || !weatherData.weather[0] || !weatherData.main) {
             console.warn("Dữ liệu thời tiết không đủ để xác định hình nền trên trang thông báo. Sử dụng nền mặc định.");
-            // Giữ nền mặc định của body nếu không có dữ liệu
             return;
         }
 
-        const condition = weatherData.weather[0].main.toLowerCase();
+        const description = weatherData.weather[0].description.toLowerCase(); // Use description for more detail
+        const mainCondition = weatherData.weather[0].main.toLowerCase(); // Use main for general categories
         const icon = weatherData.weather[0].icon;
         const tempCelsius = weatherData.main.temp;
-        let newWeatherClass = '';
 
         if (icon && icon.endsWith('n')) {
-            if (condition.includes('clear')) newWeatherClass = 'clear-night';
-            else if (condition.includes('cloud')) newWeatherClass = 'cloudy';
-            else if (condition.includes('rain') || condition.includes('drizzle')) newWeatherClass = 'rainy';
-            else if (condition.includes('snow')) newWeatherClass = 'snowy';
-            else if (condition.includes('thunderstorm')) newWeatherClass = 'stormy';
-            else if (condition.includes('mist') || condition.includes('fog') || condition.includes('haze') || condition.includes('smoke')) newWeatherClass = 'misty';
-            else newWeatherClass = 'clear-night';
+            if (description.includes('clear sky')) newWeatherClass = 'clear-night';
+            else if (description.includes('few clouds')) newWeatherClass = 'clear-night'; // Few clouds at night can still be clear-night
+            else if (description.includes('scattered clouds')) newWeatherClass = 'cloudy-night'; // New class for scattered clouds at night
+            else if (description.includes('broken clouds') || description.includes('overcast clouds')) newWeatherClass = 'overcast-night'; // New class for darker clouds at night
+            else if (mainCondition.includes('rain') || mainCondition.includes('drizzle')) newWeatherClass = 'rainy';
+            else if (mainCondition.includes('snow')) newWeatherClass = 'snowy';
+            else if (mainCondition.includes('thunderstorm')) newWeatherClass = 'stormy';
+            else if (mainCondition.includes('mist') || mainCondition.includes('fog') || mainCondition.includes('haze') || mainCondition.includes('smoke') || mainCondition.includes('sand') || mainCondition.includes('dust') || mainCondition.includes('ash') || mainCondition.includes('squall') || mainCondition.includes('tornado')) newWeatherClass = 'misty';
+            else if (mainCondition.includes('clouds')) newWeatherClass = 'cloudy-night'; // Fallback for other cloud types at night
+            else newWeatherClass = 'clear-night'; // Default night if no specific match
         } else {
             if (tempCelsius > 33) newWeatherClass = 'hot';
-            else if (condition.includes('clear')) newWeatherClass = 'sunny';
-            else if (condition.includes('cloud')) newWeatherClass = 'cloudy';
-            else if (condition.includes('rain') || condition.includes('drizzle')) newWeatherClass = 'rainy';
-            else if (condition.includes('snow')) newWeatherClass = 'snowy';
-            else if (condition.includes('thunderstorm')) newWeatherClass = 'stormy';
-            else if (condition.includes('mist') || condition.includes('fog') || condition.includes('haze') || condition.includes('smoke')) newWeatherClass = 'misty';
-            else newWeatherClass = 'sunny';
+            else if (description.includes('clear sky')) newWeatherClass = 'sunny';
+            else if (description.includes('few clouds')) newWeatherClass = 'sunny';
+            else if (description.includes('scattered clouds')) newWeatherClass = 'cloudy'; // Existing cloudy for scattered
+            else if (description.includes('broken clouds') || description.includes('overcast clouds')) newWeatherClass = 'overcast'; // New class for darker clouds
+            else if (mainCondition.includes('rain') || mainCondition.includes('drizzle')) newWeatherClass = 'rainy';
+            else if (mainCondition.includes('snow')) newWeatherClass = 'snowy';
+            else if (mainCondition.includes('thunderstorm')) newWeatherClass = 'stormy';
+            else if (mainCondition.includes('mist') || mainCondition.includes('fog') || mainCondition.includes('haze') || mainCondition.includes('smoke') || mainCondition.includes('sand') || mainCondition.includes('dust') || mainCondition.includes('ash') || mainCondition.includes('squall') || mainCondition.includes('tornado')) newWeatherClass = 'misty';
+            else if (mainCondition.includes('clouds')) newWeatherClass = 'cloudy'; // Fallback for other cloud types during day
+            else newWeatherClass = 'sunny'; // Default day if no specific match
         }
 
         if (newWeatherClass) {
@@ -123,16 +130,40 @@ document.addEventListener("DOMContentLoaded", () => {
                     console.log(`Detected location for background: ${cityName}. Fetching weather.`);
                     fetchWeatherForBackground(cityName);
                 } else {
-                    console.warn(`Could not determine city from coordinates for background. Falling back to ${fallbackCity}.`);
-                    fetchWeatherForBackground(fallbackCity);
+                    console.warn(`Could not determine city from coordinates for background. Falling back to stored/default city.`);
+                    // Fallback to localStorage or default if city from coords fails
+                    const lastSearchedCity = localStorage.getItem('lastSearchedCity');
+                    if (lastSearchedCity) {
+                        console.log(`Using last searched city from localStorage for background: ${lastSearchedCity}.`);
+                        fetchWeatherForBackground(lastSearchedCity);
+                    } else {
+                        console.warn(`No last searched city found. Falling back to default: ${fallbackCity}.`);
+                        fetchWeatherForBackground(fallbackCity);
+                    }
                 }
             }, (error) => {
-                console.warn(`Geolocation failed for background: ${error.message}. Falling back to ${fallbackCity}.`);
-                fetchWeatherForBackground(fallbackCity);
+                console.warn(`Geolocation failed for background: ${error.message}. Falling back to stored/default city.`);
+                // Fallback to localStorage or default if geolocation fails
+                const lastSearchedCity = localStorage.getItem('lastSearchedCity');
+                if (lastSearchedCity) {
+                    console.log(`Using last searched city from localStorage for background: ${lastSearchedCity}.`);
+                    fetchWeatherForBackground(lastSearchedCity);
+                } else {
+                    console.warn(`No last searched city found. Falling back to default: ${fallbackCity}.`);
+                    fetchWeatherForBackground(fallbackCity);
+                }
             }, { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 });
         } else {
-            console.warn(`Geolocation is not supported by this browser for background. Falling back to ${fallbackCity}.`);
-            fetchWeatherForBackground(fallbackCity);
+            console.warn(`Geolocation is not supported by this browser for background. Falling back to stored/default city.`);
+            // Fallback to localStorage or default if geolocation not supported
+            const lastSearchedCity = localStorage.getItem('lastSearchedCity');
+            if (lastSearchedCity) {
+                console.log(`Using last searched city from localStorage for background: ${lastSearchedCity}.`);
+                fetchWeatherForBackground(lastSearchedCity);
+            } else {
+                console.warn(`No last searched city found. Falling back to default: ${fallbackCity}.`);
+                fetchWeatherForBackground(fallbackCity);
+            }
         }
     }
 
@@ -271,7 +302,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Khởi tạo ---
     loadSettings();
-    // Set active link and show main section for current page
+     // Set active link and show main section for current page
+    // Ensure this only runs on thongbao.html
     const notificationsNavLink = Array.from(document.querySelectorAll('.nav-link')).find(link => link.textContent.trim().includes('Thông báo'));
     if (notificationsNavLink) showSection('notificationsPage', notificationsNavLink);
 

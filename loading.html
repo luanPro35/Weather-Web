@@ -96,6 +96,32 @@
         );
       }
 
+      .overcast {
+        background: linear-gradient(
+          135deg,
+          #4a4a4a 0%,
+          #333333 50%,
+          #222222 100%
+        ); /* Darker, gloomy gray */
+      }
+
+      .cloudy-night {
+        background: linear-gradient(
+          135deg,
+          #2c3e50 0%,
+          #34495e 50%,
+          #4a6741 100%
+        ); /* Similar to rainy, but maybe a bit less green */
+      }
+
+      .overcast-night {
+        background: linear-gradient(
+          135deg,
+          #1a1a1a 0%,
+          #0a0a0a 100%
+        ); /* Very dark, almost black */
+      }
+
       .loading-container {
         text-align: center;
         animation: fadeIn 1s ease-in-out;
@@ -365,25 +391,6 @@
       // Weather API configuration
       const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của bạn
       const DEFAULT_CITY = "Da Nang"; // Thành phố mặc định
-
-      // Weather background mapping
-      const weatherBackgrounds = {
-        "clear sky": "sunny",
-        "few clouds": "sunny",
-        "scattered clouds": "cloudy",
-        "broken clouds": "cloudy",
-        "overcast clouds": "cloudy",
-        "shower rain": "rainy",
-        rain: "rainy",
-        thunderstorm: "stormy",
-        snow: "snowy",
-        mist: "misty",
-        fog: "misty",
-        haze: "misty",
-        dust: "misty",
-        sand: "misty",
-        smoke: "misty",
-      };
 
       // Loading steps
       const loadingSteps = [

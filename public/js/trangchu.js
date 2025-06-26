@@ -98,7 +98,7 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
       function setDynamicBackground(weatherData) {
         const body = document.body;
         // Danh sách tất cả các lớp CSS thời tiết có thể có trên body
-        const existingWeatherClasses = ['sunny', 'cloudy', 'rainy', 'snowy', 'stormy', 'clear-night', 'misty', 'hot'];
+        const existingWeatherClasses = ['sunny', 'cloudy', 'overcast', 'rainy', 'snowy', 'stormy', 'clear-night', 'cloudy-night', 'overcast-night', 'misty', 'hot'];
 
         // 1. Xóa tất cả các lớp thời tiết hiện có khỏi body
         existingWeatherClasses.forEach(cls => {
@@ -108,36 +108,42 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
         });
 
         // 2. Xác định lớp CSS thời tiết mới dựa trên dữ liệu API
-        let newWeatherClass = '';
+        let newWeatherClass = ''; // Default to empty, so body's default CSS background applies if no match
 
         if (!weatherData || !weatherData.weather || !weatherData.weather[0] || !weatherData.main) {
             console.warn("Dữ liệu thời tiết không đủ để xác định hình nền. Sử dụng nền mặc định.");
-            // Body sẽ tự động sử dụng nền mặc định vì không có class nào được thêm
             return;
         }
 
-        const condition = weatherData.weather[0].main.toLowerCase(); // Ví dụ: "clear", "clouds", "rain"
+        const description = weatherData.weather[0].description.toLowerCase(); // Use description for more detail
+        const mainCondition = weatherData.weather[0].main.toLowerCase(); // Use main for general categories
         const icon = weatherData.weather[0].icon; // Ví dụ: "01d" (ngày), "01n" (đêm)
         const tempCelsius = weatherData.main.temp; // API trả về Celsius do 'units=metric'
 
         // Ưu tiên kiểm tra ban đêm trước dựa vào icon từ API
         if (icon && icon.endsWith('n')) { // Kiểm tra nếu là ban đêm
-            if (condition.includes('clear')) newWeatherClass = 'clear-night';
-            else if (condition.includes('cloud')) newWeatherClass = 'cloudy'; // Có thể tạo 'cloudy-night'
-            else if (condition.includes('rain') || condition.includes('drizzle')) newWeatherClass = 'rainy';
-            else if (condition.includes('snow')) newWeatherClass = 'snowy';
-            else if (condition.includes('thunderstorm')) newWeatherClass = 'stormy';
-            else if (condition.includes('mist') || condition.includes('fog') || condition.includes('haze') || condition.includes('smoke') || condition.includes('sand') || condition.includes('dust') || condition.includes('ash') || condition.includes('squall') || condition.includes('tornado')) newWeatherClass = 'misty';
-            else newWeatherClass = 'clear-night'; // Mặc định cho các điều kiện ban đêm khác
+            if (description.includes('clear sky')) newWeatherClass = 'clear-night';
+            else if (description.includes('few clouds')) newWeatherClass = 'clear-night'; // Few clouds at night can still be clear-night
+            else if (description.includes('scattered clouds')) newWeatherClass = 'cloudy-night'; // New class for scattered clouds at night
+            else if (description.includes('broken clouds') || description.includes('overcast clouds')) newWeatherClass = 'overcast-night'; // New class for darker clouds at night
+            else if (mainCondition.includes('rain') || mainCondition.includes('drizzle')) newWeatherClass = 'rainy';
+            else if (mainCondition.includes('snow')) newWeatherClass = 'snowy';
+            else if (mainCondition.includes('thunderstorm')) newWeatherClass = 'stormy';
+            else if (mainCondition.includes('mist') || mainCondition.includes('fog') || mainCondition.includes('haze') || mainCondition.includes('smoke') || mainCondition.includes('sand') || mainCondition.includes('dust') || mainCondition.includes('ash') || mainCondition.includes('squall') || mainCondition.includes('tornado')) newWeatherClass = 'misty';
+            else if (mainCondition.includes('clouds')) newWeatherClass = 'cloudy-night'; // Fallback for other cloud types at night
+            else newWeatherClass = 'clear-night'; // Default night if no specific match
         } else { // Ban ngày
             if (tempCelsius > 33) newWeatherClass = 'hot'; // Ngưỡng nhiệt độ cho 'hot'
-            else if (condition.includes('clear')) newWeatherClass = 'sunny';
-            else if (condition.includes('cloud')) newWeatherClass = 'cloudy';
-            else if (condition.includes('rain') || condition.includes('drizzle')) newWeatherClass = 'rainy';
-            else if (condition.includes('snow')) newWeatherClass = 'snowy';
-            else if (condition.includes('thunderstorm')) newWeatherClass = 'stormy';
-            else if (condition.includes('mist') || condition.includes('fog') || condition.includes('haze') || condition.includes('smoke') || condition.includes('sand') || condition.includes('dust') || condition.includes('ash') || condition.includes('squall') || condition.includes('tornado')) newWeatherClass = 'misty';
-            else newWeatherClass = 'sunny'; // Mặc định cho các điều kiện ban ngày khác
+            else if (description.includes('clear sky')) newWeatherClass = 'sunny';
+            else if (description.includes('few clouds')) newWeatherClass = 'sunny';
+            else if (description.includes('scattered clouds')) newWeatherClass = 'cloudy'; // Existing cloudy for scattered
+            else if (description.includes('broken clouds') || description.includes('overcast clouds')) newWeatherClass = 'overcast'; // New class for darker clouds
+            else if (mainCondition.includes('rain') || mainCondition.includes('drizzle')) newWeatherClass = 'rainy';
+            else if (mainCondition.includes('snow')) newWeatherClass = 'snowy';
+            else if (mainCondition.includes('thunderstorm')) newWeatherClass = 'stormy';
+            else if (mainCondition.includes('mist') || mainCondition.includes('fog') || mainCondition.includes('haze') || mainCondition.includes('smoke') || mainCondition.includes('sand') || mainCondition.includes('dust') || mainCondition.includes('ash') || mainCondition.includes('squall') || mainCondition.includes('tornado')) newWeatherClass = 'misty';
+            else if (mainCondition.includes('clouds')) newWeatherClass = 'cloudy'; // Fallback for other cloud types during day
+            else newWeatherClass = 'sunny'; // Default day if no specific match
         }
 
         // 3. Thêm lớp CSS thời tiết mới vào body
@@ -167,8 +173,27 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
           data.wind.speed
         );
 
+        // Xử lý hiển thị tầm nhìn. API OpenWeatherMap thường giới hạn ở 10,000m.
+        // Nếu giá trị là 10,000m, chúng ta hiển thị là "Trên 10 km" để phản ánh đúng hơn.
+        let visibilityText;
+        if (data.visibility >= 10000) {
+            visibilityText = 'Trên 10 km';
+        } else {
+            // Hiển thị giá trị chính xác nếu dưới 10km
+            visibilityText = `${(data.visibility / 1000).toFixed(1)} km`;
+        }
+
         // Cập nhật nền động
         setDynamicBackground(data);
+
+        // Lưu thành phố hiện tại vào localStorage để các trang khác có thể sử dụng
+        localStorage.setItem('lastSearchedCity', data.name);
+
+        // Cập nhật link "Dự báo" với thành phố hiện tại
+        const forecastLink = document.querySelector('a[href*="dubao.html"]');
+        if (forecastLink) {
+            forecastLink.href = `../html/dubao.html?city=${encodeURIComponent(data.name)}`;
+        }
 
         const html = `
           <div class="weather-card">
@@ -205,9 +230,9 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
                 )} m/s</div>
               </div>
               <div class="detail-item">
-                <span class="detail-icon">🌡️</span>
-                <div class="detail-label">Áp suất</div>
-                <div class="detail-value">${data.main.pressure} hPa</div>
+                <span class="detail-icon"><i class="fas fa-eye"></i></span>
+                <div class="detail-label">Tầm nhìn</div>
+                <div class="detail-value">${visibilityText}</div>
               </div>
             </div>
 
@@ -236,75 +261,75 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
       // Bao gồm tất cả 63 tỉnh thành và các tên gọi phổ biến.
       const provinceToCityMap = {
         // Miền Bắc
-        'hà giang': 'Hà Giang', 'ha giang': 'Hà Giang',
-        'cao bằng': 'Cao Bằng', 'cao bang': 'Cao Bằng',
-        'bắc kạn': 'Bắc Kạn', 'bac kan': 'Bắc Kạn',
-        'lạng sơn': 'Lạng Sơn', 'lang son': 'Lạng Sơn',
-        'tuyên quang': 'Tuyên Quang', 'tuyen quang': 'Tuyên Quang',
-        'thái nguyên': 'Thái Nguyên', 'thai nguyen': 'Thái Nguyên',
-        'phú thọ': 'Việt Trì', 'phu tho': 'Việt Trì',
-        'bắc giang': 'Bắc Giang', 'bac giang': 'Bắc Giang',
-        'quảng ninh': 'Hạ Long', 'quang ninh': 'Hạ Long',
-        'lào cai': 'Lào Cai', 'lao cai': 'Lào Cai',
-        'yên bái': 'Yên Bái', 'yen bai': 'Yên Bái',
-        'điện biên': 'Điện Biên Phủ', 'dien bien': 'Điện Biên Phủ',
-        'hòa bình': 'Hòa Bình', 'hoa binh': 'Hòa Bình',
-        'lai châu': 'Lai Châu', 'lai chau': 'Lai Châu',
-        'sơn la': 'Sơn La', 'son la': 'Sơn La',
-        'bắc ninh': 'Bắc Ninh', 'bac ninh': 'Bắc Ninh',
-        'hà nam': 'Phủ Lý', 'ha nam': 'Phủ Lý',
-        'hải dương': 'Hải Dương', 'hai duong': 'Hải Dương',
-        'hưng yên': 'Hưng Yên', 'hung yen': 'Hưng Yên',
-        'nam định': 'Nam Định', 'nam dinh': 'Nam Định',
-        'ninh bình': 'Ninh Bình', 'ninh binh': 'Ninh Bình',
-        'thái bình': 'Thái Bình', 'thai binh': 'Thái Bình',
-        'vĩnh phúc': 'Vĩnh Yên', 'vinh phuc': 'Vĩnh Yên',
-        'hà nội': 'Hà Nội', 'ha noi': 'Hà Nội',
-        'hải phòng': 'Hải Phòng', 'hai phong': 'Hải Phòng',
-    
+        'hà giang': 'Ha Giang', 'ha giang': 'Ha Giang', // Hà Giang
+        'cao bằng': 'Cao Bang', 'cao bang': 'Cao Bang', // Cao Bằng
+        'bắc kạn': 'Bac Kan', 'bac kan': 'Bac Kan', // Bắc Kạn
+        'lạng sơn': 'Lang Son', 'lang son': 'Lang Son', // Lạng Sơn
+        'tuyên quang': 'Tuyen Quang', 'tuyen quang': 'Tuyen Quang', // Tuyên Quang
+        'thái nguyên': 'Thai Nguyen', 'thai nguyen': 'Thai Nguyen', // Thái Nguyên
+        'phú thọ': 'Phu Tho', 'phu tho': 'Phu Tho', // Phú Thọ
+        'bắc giang': 'Bac Giang', 'bac giang': 'Bac Giang', // Bắc Giang
+        'quảng ninh': 'Quang Ninh', 'quang ninh': 'Quang Ninh', // Quảng Ninh
+        'lào cai': 'Lao Cai', 'lao cai': 'Lao Cai', // Lào Cai
+        'yên bái': 'Yen Bai', 'yen bai': 'Yen Bai', // Yên Bái
+        'điện biên': 'Dien Bien', 'dien bien': 'Dien Bien', // Điện Biên
+        'điện biên phủ': 'Dien Bien Phu', 'dien bien phu': 'Dien Bien Phu', // Điện Biên Phủ
+        'lai châu': 'Lai Chau', 'lai chau': 'Lai Chau', // Lai Châu
+        'sơn la': 'Son La', 'son la': 'Son La', // Sơn La
+        'bắc ninh': 'Bac Ninh', 'bac ninh': 'Bac Ninh', // Bắc Ninh
+        'hà nam': 'Ha Nam', 'ha nam': 'Ha Nam', // Hà Nam
+        'hải dương': 'Hai Duong', 'hai duong': 'Hai Duong', // Hải Dương
+        'hưng yên': 'Hung Yen', 'hung yen': 'Hung Yen', // Hưng Yên
+        'nam định': 'Nam Dinh', 'nam dinh': 'Nam Dinh', // Nam Định
+        'ninh bình': 'Ninh Binh', 'ninh binh': 'Ninh Binh', // Ninh Bình
+        'thái bình': 'Thai Binh', 'thai binh': 'Thai Binh', // Thái Bình
+        'vĩnh phúc': 'Vinh Phuc', 'vinh phuc': 'Vinh Phuc', // Vĩnh Phúc
+        'hà nội': 'Hanoi', 'ha noi': 'Hanoi', // Hà Nội (Thành phố trực thuộc TW)
+        'hải phòng': 'Haiphong', 'hai phong': 'Haiphong', // Hải Phòng (Thành phố trực thuộc TW)
+
         // Miền Trung
-        'thanh hóa': 'Thanh Hóa', 'thanh hoa': 'Thanh Hóa',
-        'nghệ an': 'Vinh', 'nghe an': 'Vinh',
-        'hà tĩnh': 'Hà Tĩnh', 'ha tinh': 'Hà Tĩnh',
-        'quảng bình': 'Đồng Hới', 'quang binh': 'Đồng Hới',
-        'quảng trị': 'Đông Hà', 'quang tri': 'Đông Hà',
-        'thừa thiên huế': 'Huế', 'thua thien hue': 'Huế',
-        'đà nẵng': 'Đà Nẵng', 'da nang': 'Đà Nẵng',
-        'quảng nam': 'Tam Kỳ', 'quang nam': 'Tam Kỳ',
-        'quảng ngãi': 'Quảng Ngãi', 'quang ngai': 'Quảng Ngãi',
-        'bình định': 'Quy Nhơn', 'binh dinh': 'Quy Nhơn',
-        'phú yên': 'Tuy Hòa', 'phu yen': 'Tuy Hòa',
-        'khánh hòa': 'Nha Trang', 'khanh hoa': 'Nha Trang',
-        'ninh thuận': 'Phan Rang-Tháp Chàm', 'ninh thuan': 'Phan Rang-Tháp Chàm', 'phan rang': 'Phan Rang-Tháp Chàm',
-        'bình thuận': 'Phan Thiết', 'binh thuan': 'Phan Thiết',
-        'kon tum': 'Kon Tum',
-        'gia lai': 'Pleiku',
-        'đắk lắk': 'Buôn Ma Thuột', 'dak lak': 'Buôn Ma Thuột', 'bmt': 'Buôn Ma Thuột',
-        'đắk nông': 'Gia Nghĩa', 'dak nong': 'Gia Nghĩa',
-        'lâm đồng': 'Đà Lạt', 'lam dong': 'Đà Lạt',
-    
+        'thanh hóa': 'Thanh Hoa', 'thanh hoa': 'Thanh Hoa', // Thanh Hóa
+        'nghệ an': 'Nghe An', 'nghe an': 'Nghe An', // Nghệ An
+        'hà tĩnh': 'Ha Tinh', 'ha tinh': 'Ha Tinh', // Hà Tĩnh
+        'quảng bình': 'Quang Binh', 'quang binh': 'Quang Binh', // Quảng Bình
+        'quảng trị': 'Quang Tri', 'quang tri': 'Quang Tri', // Quảng Trị
+        'thừa thiên huế': 'Thua Thien Hue', 'thua thien hue': 'Thua Thien Hue', // Thừa Thiên Huế
+        'đà nẵng': 'Da Nang', 'da nang': 'Da Nang', // Đà Nẵng (Thành phố trực thuộc TW)
+        'quảng nam': 'Quang Nam', 'quang nam': 'Quang Nam', // Quảng Nam
+        'quảng ngãi': 'Quang Ngai', 'quang ngai': 'Quang Ngai', // Quảng Ngãi
+        'bình định': 'Binh Dinh', 'binh dinh': 'Binh Dinh', // Bình Định
+        'phú yên': 'Phu Yen', 'phu yen': 'Phu Yen', // Phú Yên
+        'khánh hòa': 'Khanh Hoa', 'khanh hoa': 'Khanh Hoa', // Khánh Hòa
+        'ninh thuận': 'Ninh Thuan', 'ninh thuan': 'Ninh Thuan', 'phan rang': 'Ninh Thuan', // Ninh Thuận
+        'bình thuận': 'Binh Thuan', 'binh thuan': 'Binh Thuan', // Bình Thuận
+        'kon tum': 'Kon Tum', // Kon Tum
+        'gia lai': 'Gia Lai', // Gia Lai
+        'đắk lắk': 'Dak Lak', 'dak lak': 'Dak Lak', 'bmt': 'Dak Lak', // Đắk Lắk
+        'đắk nông': 'Dak Nong', 'dak nong': 'Dak Nong', // Đắk Nông
+        'lâm đồng': 'Lam Dong', 'lam dong': 'Lam Dong', // Lâm Đồng
+
         // Miền Nam
-        'bình phước': 'Đồng Xoài', 'binh phuoc': 'Đồng Xoài',
-        'bình dương': 'Thủ Dầu Một', 'binh duong': 'Thủ Dầu Một',
-        'đồng nai': 'Biên Hòa', 'dong nai': 'Biên Hòa',
-        'tây ninh': 'Tây Ninh', 'tay ninh': 'Tây Ninh',
-        'bà rịa vũng tàu': 'Vũng Tàu',
-        'ba ria vung tau': 'Vũng Tàu',
-        'brvt': 'Vũng Tàu',
+        'bình phước': 'Binh Phuoc', 'binh phuoc': 'Binh Phuoc', // Bình Phước
+        'bình dương': 'Binh Duong', 'binh duong': 'Binh Duong', // Bình Dương
+        'đồng nai': 'Dong Nai', 'dong nai': 'Dong Nai', // Đồng Nai
+        'tây ninh': 'Tay Ninh', 'tay ninh': 'Tay Ninh', // Tây Ninh
+        'bà rịa vũng tàu': 'Ba Ria - Vung Tau', // Bà Rịa - Vũng Tàu
+        'ba ria vung tau': 'Ba Ria - Vung Tau',
+        'brvt': 'Ba Ria - Vung Tau',
         'hồ chí minh': 'Ho Chi Minh City', 'ho chi minh city': 'Ho Chi Minh City', 'hcm': 'Ho Chi Minh City', 'tp hcm': 'Ho Chi Minh City', 'sài gòn': 'Ho Chi Minh City', 'sai gon': 'Ho Chi Minh City',
-        'long an': 'Tân An',
-        'đồng tháp': 'Cao Lãnh', 'dong thap': 'Cao Lãnh',
-        'tiền giang': 'Mỹ Tho', 'tien giang': 'Mỹ Tho',
-        'an giang': 'Long Xuyên',
-        'bến tre': 'Bến Tre', 'ben tre': 'Bến Tre',
-        'vĩnh long': 'Vĩnh Long', 'vinh long': 'Vĩnh Long',
-        'trà vinh': 'Trà Vinh', 'tra vinh': 'Trà Vinh',
-        'hậu giang': 'Vị Thanh', 'hau giang': 'Vị Thanh',
-        'kiên giang': 'Rạch Giá', 'kien giang': 'Rạch Giá',
-        'sóc trăng': 'Sóc Trăng', 'soc trang': 'Sóc Trăng',
-        'bạc liêu': 'Bạc Liêu', 'bac lieu': 'Bạc Liêu',
-        'cà mau': 'Cà Mau', 'ca mau': 'Cà Mau',
-        'cần thơ': 'Cần Thơ', 'can tho': 'Cần Thơ'
+        'long an': 'Long An', // Long An
+        'đồng tháp': 'Dong Thap', 'dong thap': 'Dong Thap', // Đồng Tháp
+        'tiền giang': 'Tien Giang', 'tien giang': 'Tien Giang', // Tiền Giang
+        'an giang': 'An Giang', // An Giang
+        'bến tre': 'Ben Tre', 'ben tre': 'Ben Tre', // Bến Tre
+        'vĩnh long': 'Vinh Long', 'vinh long': 'Vinh Long', // Vĩnh Long
+        'trà vinh': 'Tra Vinh', 'tra vinh': 'Tra Vinh', // Trà Vinh
+        'hậu giang': 'Hau Giang', 'hau giang': 'Hau Giang', // Hậu Giang
+        'kiên giang': 'Kien Giang', 'kien giang': 'Kien Giang', // Kiên Giang
+        'sóc trăng': 'Soc Trang', 'soc trang': 'Soc Trang', // Sóc Trăng
+        'bạc liêu': 'Bac Lieu', 'bac lieu': 'Bac Lieu', // Bạc Liêu
+        'cà mau': 'Ca Mau', 'ca mau': 'Ca Mau', // Cà Mau
+    'cần thơ': 'Cần Thơ', 'can tho': 'Cần Thơ'
       };
 
       // Fetch weather data
@@ -398,16 +423,21 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
       // Event listeners
       document.addEventListener("DOMContentLoaded", () => {
         loadWeatherBasedOnLocation(DEFAULT_CITY, API_KEY, getWeather);
-
+ 
         // Set active link for current page based on URL
         const currentPath = window.location.pathname;
         const navLinks = document.querySelectorAll('.nav-link');
+ 
+        // Xóa trạng thái 'active' khỏi tất cả các link để đảm bảo reset đúng
         navLinks.forEach(link => {
-            if (link.href.includes(currentPath.split('/').pop())) { // Compare last part of path
-                link.classList.add('active');
-            }
+            link.classList.remove('active');
         });
-
+ 
+        // Thêm lại trạng thái 'active' chỉ cho link khớp với trang hiện tại
+        const homeLink = document.querySelector('a[href*="trangchu.html"]');
+        if (homeLink && currentPath.includes('trangchu.html')) {
+            homeLink.classList.add('active');
+        }
         const cityInput = document.getElementById("cityInput");
         const searchIcon = document.querySelector(".search-icon"); // Lấy icon tìm kiếm
 

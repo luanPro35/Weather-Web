@@ -11,6 +11,10 @@ body {
     color: white;
 }
 
+body::-webkit-scrollbar {
+    display: none;
+}
+
 .brand {
     display: flex;
     align-items: center;

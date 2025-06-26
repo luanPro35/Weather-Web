@@ -58,75 +58,13 @@ function showSection(sectionName, navLinkElement) {
   }
 }
 
-// Smart suggestions based on weather
-function getWeatherSuggestions(weather, temp, humidity, windSpeed) {
-  const suggestions = [];
-  const condition = weather.toLowerCase();
-
-  // Temperature based suggestions
-  if (temp <= 10) {
-    suggestions.push({ icon: "🧥", text: "Mặc áo ấm, trời lạnh!" });
-    suggestions.push({ icon: "🧤", text: "Đeo găng tay để giữ ấm tay" });
-  } else if (temp >= 30) {
-    suggestions.push({ icon: "🌡️", text: "Trời nóng, uống nhiều nước!" });
-    suggestions.push({ icon: "👕", text: "Mặc quần áo mát mẻ" });
-  }
-
-  // Weather condition suggestions
-  if (condition.includes("rain") || condition.includes("shower")) {
-    suggestions.push({ icon: "☔", text: "Mang theo ô hoặc áo mưa" });
-    suggestions.push({ icon: "👢", text: "Đi giày chống nước" });
-  }
-
-  if (condition.includes("snow")) {
-    suggestions.push({ icon: "❄️", text: "Mang găng tay và mũ ấm" });
-    suggestions.push({ icon: "🧣", text: "Quàng khăn giữ ấm" });
-  }
-
-  if (condition.includes("thunderstorm")) {
-    suggestions.push({ icon: "⛈️", text: "Tránh ra ngoài nếu có thể" });
-    suggestions.push({ icon: "🏠", text: "Ở trong nhà để an toàn" });
-  }
-
-  // Humidity based suggestions
-  if (humidity > 80) {
-    suggestions.push({
-      icon: "💧",
-      text: "Độ ẩm cao, cẩn thận với đồ điện tử",
-    });
-  }
-
-  // Wind speed based suggestions
-  if (windSpeed > 20) {
-    suggestions.push({
-      icon: "🌪️",
-      text: "Gió mạnh, cẩn thận khi ra ngoài",
-    });
-  }
-
-  return suggestions;
-}
-
-// Format timestamp to readable date
-function formatDateTime(timestamp) {
-  const date = new Date(timestamp * 1000);
-  return date.toLocaleString("vi-VN", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 /**
  * Cập nhật hình nền của body dựa trên dữ liệu thời tiết.
  * @param {object} weatherData - Dữ liệu thời tiết từ API.
  */
 function setDynamicBackground(weatherData) {
   const body = document.body;
-  const existingWeatherClasses = ['sunny', 'cloudy', 'rainy', 'snowy', 'stormy', 'clear-night', 'misty', 'hot'];
+  const existingWeatherClasses = ['sunny', 'cloudy', 'overcast', 'rainy', 'snowy', 'stormy', 'clear-night', 'cloudy-night', 'overcast-night', 'misty', 'hot'];
 
   existingWeatherClasses.forEach(cls => {
     if (body.classList.contains(cls)) {
@@ -134,33 +72,41 @@ function setDynamicBackground(weatherData) {
     }
   });
 
+  let newWeatherClass = ''; // Default to empty, so body's default CSS background applies if no match
+
   if (!weatherData || !weatherData.weather || !weatherData.weather[0] || !weatherData.main) {
     console.warn("Dữ liệu thời tiết không đủ để xác định hình nền. Sử dụng nền mặc định.");
     return;
   }
 
-  const condition = weatherData.weather[0].main.toLowerCase();
+  const description = weatherData.weather[0].description.toLowerCase(); // Use description for more detail
+  const mainCondition = weatherData.weather[0].main.toLowerCase(); // Use main for general categories
   const icon = weatherData.weather[0].icon;
   const tempCelsius = weatherData.main.temp;
-  let newWeatherClass = '';
 
   if (icon && icon.endsWith('n')) {
-    if (condition.includes('clear')) newWeatherClass = 'clear-night';
-    else if (condition.includes('cloud')) newWeatherClass = 'cloudy';
-    else if (condition.includes('rain') || condition.includes('drizzle')) newWeatherClass = 'rainy';
-    else if (condition.includes('snow')) newWeatherClass = 'snowy';
-    else if (condition.includes('thunderstorm')) newWeatherClass = 'stormy';
-    else if (condition.includes('mist') || condition.includes('fog') || condition.includes('haze') || condition.includes('smoke') || condition.includes('sand') || condition.includes('dust') || condition.includes('ash') || condition.includes('squall') || condition.includes('tornado')) newWeatherClass = 'misty';
-    else newWeatherClass = 'clear-night';
+    if (description.includes('clear sky')) newWeatherClass = 'clear-night';
+    else if (description.includes('few clouds')) newWeatherClass = 'clear-night'; // Few clouds at night can still be clear-night
+    else if (description.includes('scattered clouds')) newWeatherClass = 'cloudy-night'; // New class for scattered clouds at night
+    else if (description.includes('broken clouds') || description.includes('overcast clouds')) newWeatherClass = 'overcast-night'; // New class for darker clouds at night
+    else if (mainCondition.includes('rain') || mainCondition.includes('drizzle')) newWeatherClass = 'rainy';
+    else if (mainCondition.includes('snow')) newWeatherClass = 'snowy';
+    else if (mainCondition.includes('thunderstorm')) newWeatherClass = 'stormy';
+    else if (mainCondition.includes('mist') || mainCondition.includes('fog') || mainCondition.includes('haze') || mainCondition.includes('smoke') || mainCondition.includes('sand') || mainCondition.includes('dust') || mainCondition.includes('ash') || mainCondition.includes('squall') || mainCondition.includes('tornado')) newWeatherClass = 'misty';
+    else if (mainCondition.includes('clouds')) newWeatherClass = 'cloudy-night'; // Fallback for other cloud types at night
+    else newWeatherClass = 'clear-night'; // Default night if no specific match
   } else {
     if (tempCelsius > 33) newWeatherClass = 'hot';
-    else if (condition.includes('clear')) newWeatherClass = 'sunny';
-    else if (condition.includes('cloud')) newWeatherClass = 'cloudy';
-    else if (condition.includes('rain') || condition.includes('drizzle')) newWeatherClass = 'rainy';
-    else if (condition.includes('snow')) newWeatherClass = 'snowy';
-    else if (condition.includes('thunderstorm')) newWeatherClass = 'stormy';
-    else if (condition.includes('mist') || condition.includes('fog') || condition.includes('haze') || condition.includes('smoke') || condition.includes('sand') || condition.includes('dust') || condition.includes('ash') || condition.includes('squall') || condition.includes('tornado')) newWeatherClass = 'misty';
-    else newWeatherClass = 'sunny';
+    else if (description.includes('clear sky')) newWeatherClass = 'sunny';
+    else if (description.includes('few clouds')) newWeatherClass = 'sunny';
+    else if (description.includes('scattered clouds')) newWeatherClass = 'cloudy'; // Existing cloudy for scattered
+    else if (description.includes('broken clouds') || description.includes('overcast clouds')) newWeatherClass = 'overcast'; // New class for darker clouds
+    else if (mainCondition.includes('rain') || mainCondition.includes('drizzle')) newWeatherClass = 'rainy';
+    else if (mainCondition.includes('snow')) newWeatherClass = 'snowy';
+    else if (mainCondition.includes('thunderstorm')) newWeatherClass = 'stormy';
+    else if (mainCondition.includes('mist') || mainCondition.includes('fog') || mainCondition.includes('haze') || mainCondition.includes('smoke') || mainCondition.includes('sand') || mainCondition.includes('dust') || mainCondition.includes('ash') || mainCondition.includes('squall') || mainCondition.includes('tornado')) newWeatherClass = 'misty';
+    else if (mainCondition.includes('clouds')) newWeatherClass = 'cloudy'; // Fallback for other cloud types during day
+    else newWeatherClass = 'sunny'; // Default day if no specific match
   }
 
   if (newWeatherClass) {
@@ -169,71 +115,6 @@ function setDynamicBackground(weatherData) {
   } else {
     console.log("No specific weather class applied, using default body background.");
   }
-}
-
-// Update weather UI for current weather
-function updateWeatherUI(data) {
-  const weatherContent = document.getElementById("weatherContent");
-  if (!data || !data.weather || !data.weather[0] || !data.main) {
-    weatherContent.innerHTML = `<div class="error"><p>Không thể tải dữ liệu thời tiết hiện tại.</p></div>`;
-    return;
-  }
-  const weather = data.weather[0];
-  const temp = Math.round(data.main.temp);
-  const suggestions = getWeatherSuggestions(
-    weather.description,
-    temp,
-    data.main.humidity,
-    data.wind.speed
-  );
-
-  setDynamicBackground(data);
-
-  const html = `
-    <div class="weather-card">
-      <div class="current-weather">
-        <div class="weather-main">
-          <div class="location">
-            📍 ${data.name}, ${data.sys.country}
-          </div>
-          <div class="datetime">${formatDateTime(data.dt)}</div>
-          <div class="temperature">${temp}°C</div>
-          <div class="description">${weather.description}</div>
-          <div class="feels-like">Cảm giác như ${Math.round(data.main.feels_like)}°C</div>
-        </div>
-        <div class="weather-icon-container">
-          <div class="weather-icon">${weatherIcons[weather.icon] || "🌤️"}</div>
-        </div>
-      </div>
-      <div class="weather-details">
-        <div class="detail-item">
-          <span class="detail-icon">💧</span>
-          <div class="detail-label">Độ ẩm</div>
-          <div class="detail-value">${data.main.humidity}%</div>
-        </div>
-        <div class="detail-item">
-          <span class="detail-icon">💨</span>
-          <div class="detail-label">Tốc độ gió</div>
-          <div class="detail-value">${Math.round(data.wind.speed)} m/s</div>
-        </div>
-        <div class="detail-item">
-          <span class="detail-icon">🌡️</span>
-          <div class="detail-label">Áp suất</div>
-          <div class="detail-value">${data.main.pressure} hPa</div>
-        </div>
-      </div>
-      <div class="suggestions">
-        <h2 class="suggestions-title">Gợi ý cho bạn</h2>
-        <div class="suggestions-grid">
-          ${suggestions.map(suggestion => `
-            <div class="suggestion-item">
-              <span class="suggestion-icon">${suggestion.icon}</span>
-              <div class="suggestion-text">${suggestion.text}</div>
-            </div>`).join("")}
-        </div>
-      </div>
-    </div>`;
-  weatherContent.innerHTML = html;
 }
 
 let myTemperatureChart = null;
@@ -470,37 +351,33 @@ const provinceToCityMap = {
 };
 
 // Fetch current weather data
-async function getWeather(city) {
-  const weatherContent = document.getElementById("weatherContent");
-  weatherContent.innerHTML = `
-    <div class="loading">
-      <div class="loading-spinner"></div>
-      <p>Đang tải thông tin thời tiết...</p>
-    </div>`;
-
+async function loadPageData(city) {
   // Chuyển đổi tên tỉnh thành thành phố nếu có trong bản đồ
   let searchCity = city.toLowerCase().trim();
   const mappedCity = provinceToCityMap[searchCity];
   if (mappedCity) {
-      console.log(`Ánh xạ "${city}" sang "${mappedCity}" để gọi API.`);
-      searchCity = mappedCity;
+    console.log(`Ánh xạ "${city}" sang "${mappedCity}" để gọi API.`);
+    searchCity = mappedCity;
   }
 
   try {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(searchCity)}&units=metric&lang=vi&appid=${API_KEY}`);
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Không tìm thấy thành phố");
+    // 1. Fetch current weather for background
+    const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(searchCity)}&units=metric&lang=vi&appid=${API_KEY}`);
+    if (weatherResponse.ok) {
+      const weatherData = await weatherResponse.json();
+      setDynamicBackground(weatherData);
+    } else {
+      console.error("Không thể tải dữ liệu thời tiết cho nền.");
+      setDynamicBackground(null); // Sử dụng nền mặc định
     }
-    const data = await response.json();
-    updateWeatherUI(data);
-    getForecast(city); // Fetch forecast after current weather
+
+    // 2. Fetch and render the forecast data
+    await getForecast(searchCity);
   } catch (error) {
-    weatherContent.innerHTML = `
-      <div class="error">
-        <h2>❌ Lỗi</h2>
-        <p>${error.message}</p>
-      </div>`;
+    const forecastHourlyContainer = document.querySelector("#forecastSection .hourly-forecast-grid");
+    const forecastDailyContainer = document.querySelector("#forecastSection .daily-forecast-grid");
+    if (forecastHourlyContainer) forecastHourlyContainer.innerHTML = `<p class="error-text" style="color:red; text-align:center;">Lỗi: ${error.message}</p>`;
+    if (forecastDailyContainer) forecastDailyContainer.innerHTML = `<p class="error-text" style="color:red; text-align:center;">Lỗi: ${error.message}</p>`;
     setDynamicBackground(null); // Reset background on error
   }
 }
@@ -525,27 +402,27 @@ async function getCityFromCoordinates(lat, lon, apiKey) {
 }
 
 // Function to get user's current location and fetch weather
-async function loadWeatherBasedOnLocation(defaultCity, apiKey, weatherFetchFunction) {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            const cityName = await getCityFromCoordinates(lat, lon, apiKey);
-            if (cityName) {
-                console.log(`Detected location: ${cityName}. Fetching weather.`);
-                weatherFetchFunction(cityName);
-            } else {
-                console.warn(`Could not determine city from coordinates. Falling back to ${defaultCity}.`);
-                weatherFetchFunction(defaultCity);
-            }
-        }, (error) => {
-            console.warn(`Geolocation failed: ${error.message}. Falling back to ${defaultCity}.`);
-            weatherFetchFunction(defaultCity);
-        }, { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 });
-    } else {
-        console.warn(`Geolocation is not supported by this browser. Falling back to ${defaultCity}.`);
-        weatherFetchFunction(defaultCity);
-    }
+async function loadWeatherBasedOnLocation(defaultCity, apiKey, pageLoadFunction) {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const cityName = await getCityFromCoordinates(lat, lon, apiKey);
+      if (cityName) {
+        console.log(`Detected location: ${cityName}. Fetching weather.`);
+        pageLoadFunction(cityName);
+      } else {
+        console.warn(`Could not determine city from coordinates. Falling back to ${defaultCity}.`);
+        pageLoadFunction(defaultCity);
+      }
+    }, (error) => {
+      console.warn(`Geolocation failed: ${error.message}. Falling back to ${defaultCity}.`);
+      pageLoadFunction(defaultCity);
+    }, { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 });
+  } else {
+    console.warn(`Geolocation is not supported by this browser. Falling back to ${defaultCity}.`);
+    pageLoadFunction(defaultCity);
+  }
 }
 
 // Event listeners
@@ -555,11 +432,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const cityFromQuery = urlParams.get('city');
 
   if (cityFromQuery) { // If city is specified in URL, use it
-    getWeather(cityFromQuery);
+    loadPageData(cityFromQuery);
     const cityInput = document.getElementById("cityInput");
     if (cityInput) cityInput.value = cityFromQuery; // Tùy chọn: điền vào ô tìm kiếm
   } else { // Otherwise, try to get location or use default
-    loadWeatherBasedOnLocation(DEFAULT_CITY, API_KEY, getWeather);
+    loadWeatherBasedOnLocation(DEFAULT_CITY, API_KEY, loadPageData);
   }
 
   const cityInput = document.getElementById("cityInput");
@@ -567,9 +444,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Hàm xử lý tìm kiếm để tránh lặp code
   function handleSearch() {
-      if (cityInput && cityInput.value.trim()) {
-          getWeather(cityInput.value.trim());
-      }
+    if (cityInput && cityInput.value.trim()) {
+      loadPageData(cityInput.value.trim());
+    }
   }
 
   if (cityInput) {

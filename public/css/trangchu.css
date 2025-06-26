@@ -15,6 +15,10 @@ body {
     position: relative;
 }
 
+body::-webkit-scrollbar {
+    display: none;
+}
+
 /* Animated background particles */
 body::before {
     content: "";
@@ -292,15 +296,14 @@ body.misty::after {
     left: 100%;
 }
 
-.nav-link:hover,
-.nav-link.active {
+.nav-link:hover {
     background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .nav-link.active {
     background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 /* Mobile menu */

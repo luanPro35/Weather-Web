@@ -12,7 +12,7 @@
   </head>
   <body>
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar" id="mainNav">
       <div class="brand">
         <i class="fas fa-sun brand-icon"></i>
         <span class="brand-name">Weathery</span>
@@ -23,11 +23,11 @@
       <ul class="nav-menu" id="navMenu">
         <li class="nav-item">
           <a href="../html/trangchu.html" class="nav-link active">
-            <i class="fas fa-home"></i> Trang chủ
+            <i class="fas fa-home"></i> Trang Chủ
           </a>
         </li>
         <li class="nav-item">
-          <a href="../html/dubao.html#forecast" class="nav-link">
+          <a href="../html/dubao.html" class="nav-link">
             <i class="fas fa-calendar-alt"></i> Dự báo
           </a>
         </li>
@@ -42,7 +42,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#login" id="loginTriggerLink">
+          <a href="#login" class="nav-link" id="loginTriggerLink">
             <i class="fas fa-sign-in-alt"></i> Đăng nhập
           </a>
         </li>
@@ -173,5 +173,26 @@
     </div>
 
     <script src="../js/trangchu.js"></script>
+    <script>
+      // Hàm kích hoạt lại các trình lắng nghe sự kiện cho thanh điều hướng
+      function reattachNavigationListeners() {
+        const navLinks = document.querySelectorAll("#mainNav .nav-link");
+        navLinks.forEach((link) => {
+          link.addEventListener("click", function (event) {
+            // Ngăn chặn hành vi mặc định của liên kết
+            event.preventDefault();
+
+            // Lấy đường dẫn từ thuộc tính href
+            const href = this.getAttribute("href");
+
+            // Chuyển hướng đến trang mới
+            window.location.href = href;
+          });
+        });
+      }
+
+      // Gọi hàm này sau khi nội dung trang được thay thế
+      reattachNavigationListeners();
+    </script>
   </body>
 </html>
