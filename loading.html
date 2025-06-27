@@ -482,7 +482,20 @@
 
           // Redirect after fade out animation
           setTimeout(() => {
-            window.location.href = "./public/html/trangchu.html";
+            // Lấy các tham số trên URL hiện tại (ví dụ: ?name=...)
+            const params = new URLSearchParams(window.location.search);
+            const queryString = params.toString();
+
+            // Đường dẫn đúng là '/trangchu' như đã định nghĩa trong server.js
+            const targetPath = "/trangchu";
+
+            // Tạo URL cuối cùng, giữ lại các tham số
+            const redirectUrl = queryString
+              ? `${targetPath}?${queryString}`
+              : targetPath;
+
+            // Chuyển hướng đến trang chính xác
+            window.location.href = redirectUrl;
           }, 800);
         }, 3000);
       }

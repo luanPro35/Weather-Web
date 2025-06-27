@@ -45,10 +45,20 @@
             <i class="fas fa-bell"></i> Thông báo
           </a>
         </li>
-        <li class="nav-item">
-          <a href="#login" class="nav-link" id="loginTriggerLink">
+        <li class="nav-item" id="auth-section">
+          <a
+            href="http://localhost/weathery/php/login_with_google.php"
+            class="nav-link"
+            id="loginTriggerLink"
+          >
             <i class="fas fa-sign-in-alt"></i> Đăng nhập
           </a>
+          <!-- Chỗ hiển thị lời chào sau khi đăng nhập -->
+          <span
+            id="user-greeting"
+            class="nav-link"
+            style="display: none"
+          ></span>
         </li>
         <li class="nav-item">
           <div class="settings-dropdown">
@@ -198,5 +208,32 @@
       </div>
     </div>
     <script src="../js/dubao.js"></script>
+    <!-- Script để xử lý hiển thị lời chào sau khi đăng nhập Google -->
+    <script>
+      window.addEventListener("DOMContentLoaded", (event) => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const userName = urlParams.get("name");
+
+        const loginTriggerLink = document.getElementById("loginTriggerLink");
+        const userGreeting = document.getElementById("user-greeting");
+
+        if (userName && loginTriggerLink && userGreeting) {
+          const decodedUserName = decodeURIComponent(
+            userName.replace(/\+/g, " ")
+          );
+          userGreeting.textContent = `Xin chào, ${decodedUserName}`;
+          userGreeting.style.display = "inline";
+          loginTriggerLink.style.display = "none";
+          // Xóa tham số 'name' khỏi URL để giao diện đẹp hơn
+          const newUrl =
+            window.location.protocol +
+            "//" +
+            window.location.host +
+            window.location.pathname +
+            window.location.hash;
+          window.history.replaceState({ path: newUrl }, "", newUrl);
+        }
+      });
+    </script>
   </body>
 </html>
