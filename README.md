@@ -51,7 +51,25 @@ composer install
 ### 4. Cấu hình PHP
 
 - Đảm bảo extension mysqli đã được bật trong php.ini
-- Kiểm tra cấu hình trong file `php/config.php`
+- Tạo file `.env` trong thư mục `php/` dựa trên file `.env.example`:
+
+```bash
+cd php
+cp .env.example .env
+```
+
+- Chỉnh sửa file `.env` để thêm thông tin xác thực Google OAuth và cấu hình cơ sở dữ liệu:
+
+```
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+GOOGLE_REDIRECT_URI=http://localhost/weathery/php/google_oauth_callback.php
+
+DB_HOST=localhost
+DB_USERNAME=root
+DB_PASSWORD=your_password_here
+DB_NAME=weather
+```
 
 ### 5. Chạy ứng dụng
 
@@ -79,6 +97,8 @@ npm start
 
 ## Xử lý sự cố
 
-- Nếu gặp lỗi kết nối cơ sở dữ liệu, hãy kiểm tra cấu hình MySQL trong `php/config.php`
-- Nếu gặp lỗi đăng nhập Google, hãy kiểm tra cấu hình Google API trong `php/config.php`
+- Nếu gặp lỗi kết nối cơ sở dữ liệu, hãy kiểm tra cấu hình MySQL trong file `.env`
+- Nếu gặp lỗi đăng nhập Google, hãy kiểm tra cấu hình Google API trong file `.env`
 - Nếu gặp lỗi "Class mysqli not found", hãy đảm bảo extension mysqli đã được bật trong php.ini
+- Nếu gặp lỗi "Class 'Dotenv\Dotenv' not found", hãy chạy lệnh `composer install` trong thư mục `php/`
+- Nếu gặp lỗi khi đẩy code lên GitHub, hãy đảm bảo không đẩy file `.env` chứa thông tin nhạy cảm

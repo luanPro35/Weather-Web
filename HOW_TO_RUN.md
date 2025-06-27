@@ -83,8 +83,37 @@ Hoặc trong CMD:
 check_system.bat
 ```
 
+## Thiết lập biến môi trường
+
+Ứng dụng này sử dụng biến môi trường để lưu trữ thông tin nhạy cảm như thông tin xác thực Google OAuth và cấu hình cơ sở dữ liệu. Bạn cần thiết lập các biến môi trường này trước khi chạy ứng dụng:
+
+1. Tạo file `.env` trong thư mục `php/` dựa trên file `.env.example`:
+
+```cmd
+cd php
+copy .env.example .env
+```
+
+2. Chỉnh sửa file `.env` để thêm thông tin xác thực Google OAuth và cấu hình cơ sở dữ liệu của bạn.
+
+3. Cài đặt các gói phụ thuộc PHP bằng Composer:
+
+```cmd
+cd php
+composer install
+```
+
+4. Kiểm tra cài đặt biến môi trường:
+
+```cmd
+cd php
+php test_env.php
+```
+
 ## Lưu ý
 
 - Các file batch cần được chạy với quyền Administrator nếu chúng thực hiện các thao tác yêu cầu quyền nâng cao
 - Nếu bạn sử dụng PowerShell, hãy nhớ thêm `.\` trước tên file batch
 - Nếu bạn muốn tránh các vấn đề về quyền, hãy sử dụng Command Prompt (CMD) thay vì PowerShell
+- **KHÔNG BAO GIỜ** đẩy file `.env` lên kho lưu trữ Git vì nó chứa thông tin nhạy cảm
+- Xem thêm hướng dẫn về bảo mật trong file `php/SECURITY.md` và thiết lập môi trường trong file `php/ENV_SETUP.md`

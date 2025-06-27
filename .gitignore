@@ -7,3 +7,6 @@ php/vendor/
 
 # Local configuration - DO NOT COMMIT
 php/.env
+
+# Keep the example environment file
+# !php/.env.example
