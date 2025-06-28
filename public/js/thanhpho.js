@@ -104,6 +104,32 @@ function showSection(sectionName, navLinkElement) {
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
+    // Kiểm tra trạng thái đăng nhập
+    fetch('/api/user')
+        .then(response => response.json())
+        .then(data => {
+            if (data.isAuthenticated) {
+                // Hiển thị thông tin người dùng đã đăng nhập
+                const userGreeting = document.getElementById('user-greeting');
+                const authSection = document.getElementById('auth-section');
+                const loginTriggerLink = document.getElementById('loginTriggerLink');
+                
+                if (userGreeting && authSection && loginTriggerLink) {
+                    userGreeting.textContent = `Xin chào, ${data.user.displayName}`;
+                    userGreeting.style.display = 'inline-block';
+                    loginTriggerLink.style.display = 'none';
+                    
+                    // Thêm nút đăng xuất
+                    const logoutButton = document.createElement('a');
+                    logoutButton.href = '/auth/logout';
+                    logoutButton.className = 'nav-link';
+                    logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
+                    authSection.appendChild(logoutButton);
+                }
+            }
+        })
+        .catch(error => console.error('Lỗi khi kiểm tra trạng thái đăng nhập:', error));
+
     // Set active link and show main section for current page
     const citiesNavLink = Array.from(document.querySelectorAll('.nav-link')).find(link => {
         // Check if href exists and includes 'thanhpho.html' or text content matches
@@ -178,22 +204,134 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
 
-    // Xử lý submit form (hiện tại chỉ là placeholder)
+    // Xử lý đăng nhập
     if (loginForm) {
-      loginForm.addEventListener('submit', (event) => {
+      loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        alert('Chức năng đăng nhập đang được phát triển.');
+        
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        try {
+          const response = await fetch('/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            // Đăng nhập thành công
+            const userGreeting = document.getElementById('user-greeting');
+            const loginTriggerLink = document.getElementById('loginTriggerLink');
+            const authSection = document.getElementById('auth-section');
+            const loginModal = document.getElementById('loginModal');
+            
+            if (userGreeting && loginTriggerLink && authSection) {
+              userGreeting.textContent = `Xin chào, ${data.user.displayName}`;
+              userGreeting.style.display = 'inline-block';
+              loginTriggerLink.style.display = 'none';
+              
+              // Thêm nút đăng xuất
+              const logoutButton = document.createElement('a');
+              logoutButton.href = '/auth/logout';
+              logoutButton.className = 'nav-link';
+              logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
+              authSection.appendChild(logoutButton);
+              
+              // Đóng modal đăng nhập
+              if (loginModal) {
+                loginModal.style.display = 'none';
+              }
+              
+              // Làm mới trang để cập nhật trạng thái
+              window.location.reload();
+            }
+          } else {
+            // Đăng nhập thất bại
+            alert(data.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+          }
+        } catch (error) {
+          console.error('Lỗi đăng nhập:', error);
+          alert('Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau.');
+        }
       });
     }
+    
+    // Xử lý đăng ký
     if (registerForm) {
-      registerForm.addEventListener('submit', (event) => {
+      registerForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        alert('Chức năng đăng ký đang được phát triển.');
+        
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('registerConfirmPassword').value;
+        
+        // Kiểm tra mật khẩu
+        if (password !== confirmPassword) {
+          alert('Mật khẩu xác nhận không khớp!');
+          return;
+        }
+        
+        if (password.length < 6) {
+          alert('Mật khẩu phải có ít nhất 6 ký tự!');
+          return;
+        }
+        
+        try {
+          const response = await fetch('/auth/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            // Đăng ký thành công
+            const userGreeting = document.getElementById('user-greeting');
+            const loginTriggerLink = document.getElementById('loginTriggerLink');
+            const authSection = document.getElementById('auth-section');
+            const loginModal = document.getElementById('loginModal');
+            
+            if (userGreeting && loginTriggerLink && authSection) {
+              userGreeting.textContent = `Xin chào, ${data.user.displayName}`;
+              userGreeting.style.display = 'inline-block';
+              loginTriggerLink.style.display = 'none';
+              
+              // Thêm nút đăng xuất
+              const logoutButton = document.createElement('a');
+              logoutButton.href = '/auth/logout';
+              logoutButton.className = 'nav-link';
+              logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
+              authSection.appendChild(logoutButton);
+              
+              // Đóng modal đăng nhập
+              if (loginModal) {
+                loginModal.style.display = 'none';
+              }
+              
+              // Làm mới trang để cập nhật trạng thái
+              window.location.reload();
+            }
+          } else {
+            // Đăng ký thất bại
+            alert(data.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+          }
+        } catch (error) {
+          console.error('Lỗi đăng ký:', error);
+          alert('Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại sau.');
+        }
       });
     }
     if (googleLoginButton) {
       googleLoginButton.addEventListener("click", () => {
-        alert("Chức năng đăng nhập bằng Google đang được phát triển.");
+        window.location.href = '/auth/google';
       });
     }
 });

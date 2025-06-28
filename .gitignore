@@ -2,11 +2,8 @@
 node_modules/
 npm-debug.log
 
-# PHP / Composer
-php/vendor/
-
 # Local configuration - DO NOT COMMIT
-php/.env
+.env
 
 # Keep the example environment file
-# !php/.env.example
+!.env.example

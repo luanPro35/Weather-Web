@@ -422,6 +422,32 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
 
       // Event listeners
       document.addEventListener("DOMContentLoaded", () => {
+  // Kiểm tra trạng thái đăng nhập
+  fetch('/api/user')
+    .then(response => response.json())
+    .then(data => {
+      if (data.isAuthenticated) {
+        // Hiển thị thông tin người dùng đã đăng nhập
+        const userGreeting = document.getElementById('user-greeting');
+        const authSection = document.getElementById('auth-section');
+        const loginTriggerLink = document.getElementById('loginTriggerLink');
+        
+        if (userGreeting && authSection && loginTriggerLink) {
+          userGreeting.textContent = `Xin chào, ${data.user.displayName}`;
+          userGreeting.style.display = 'inline-block';
+          loginTriggerLink.style.display = 'none';
+          
+          // Thêm nút đăng xuất
+          const logoutButton = document.createElement('a');
+          logoutButton.href = '/auth/logout';
+          logoutButton.className = 'nav-link';
+          logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
+          authSection.appendChild(logoutButton);
+        }
+      }
+    })
+    .catch(error => console.error('Lỗi khi kiểm tra trạng thái đăng nhập:', error));
+
         loadWeatherBasedOnLocation(DEFAULT_CITY, API_KEY, getWeather);
  
         // Set active link for current page based on URL
@@ -564,43 +590,137 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
         });
       }
 
-      // Xử lý submit form Đăng nhập (hiện tại chỉ là placeholder)
+      // Xử lý đăng nhập
       if (loginForm) {
-        loginForm.addEventListener('submit', (event) => {
+        loginForm.addEventListener('submit', async (event) => {
           event.preventDefault();
+          
           const email = document.getElementById('loginEmail').value;
-          // const password = document.getElementById('loginPassword').value; // Lấy mật khẩu nếu cần
-          alert(`Đăng nhập với Email: ${email}. (Chức năng đang phát triển)`);
-          // Thêm logic xử lý đăng nhập ở đây (gửi dữ liệu đến backend)
-          // if (loginModalElement) loginModalElement.style.display = 'none'; // Tùy chọn: đóng modal sau khi submit
+          const password = document.getElementById('loginPassword').value;
+          
+          try {
+            const response = await fetch('/auth/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ email, password })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              // Đăng nhập thành công
+              const userGreeting = document.getElementById('user-greeting');
+              const loginTriggerLink = document.getElementById('loginTriggerLink');
+              const authSection = document.getElementById('auth-section');
+              const loginModal = document.getElementById('loginModal');
+              
+              if (userGreeting && loginTriggerLink && authSection) {
+                userGreeting.textContent = `Xin chào, ${data.user.displayName}`;
+                userGreeting.style.display = 'inline-block';
+                loginTriggerLink.style.display = 'none';
+                
+                // Thêm nút đăng xuất
+                const logoutButton = document.createElement('a');
+                logoutButton.href = '/auth/logout';
+                logoutButton.className = 'nav-link';
+                logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
+                authSection.appendChild(logoutButton);
+                
+                // Đóng modal đăng nhập
+                if (loginModal) {
+                  loginModal.style.display = 'none';
+                }
+                
+                // Làm mới trang để cập nhật trạng thái
+                window.location.reload();
+              }
+            } else {
+              // Đăng nhập thất bại
+              alert(data.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+            }
+          } catch (error) {
+            console.error('Lỗi đăng nhập:', error);
+            alert('Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau.');
+          }
         });
       }
-
-      // Xử lý submit form Đăng ký (hiện tại chỉ là placeholder)
+      
+      // Xử lý đăng ký
       if (registerForm) {
-        registerForm.addEventListener('submit', (event) => {
+        registerForm.addEventListener('submit', async (event) => {
           event.preventDefault();
+          
           const email = document.getElementById('registerEmail').value;
           const password = document.getElementById('registerPassword').value;
           const confirmPassword = document.getElementById('registerConfirmPassword').value;
-
+          
+          // Kiểm tra mật khẩu
           if (password !== confirmPassword) {
             alert('Mật khẩu xác nhận không khớp!');
             return;
           }
-          alert(`Đăng ký với Email: ${email}. (Chức năng đang phát triển)`);
-          // Thêm logic xử lý đăng ký ở đây (gửi dữ liệu đến backend)
-          // if (loginModalElement) loginModalElement.style.display = 'none'; // Tùy chọn: đóng modal sau khi submit
+          
+          if (password.length < 6) {
+            alert('Mật khẩu phải có ít nhất 6 ký tự!');
+            return;
+          }
+          
+          try {
+            const response = await fetch('/auth/register', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ email, password })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              // Đăng ký thành công
+              const userGreeting = document.getElementById('user-greeting');
+              const loginTriggerLink = document.getElementById('loginTriggerLink');
+              const authSection = document.getElementById('auth-section');
+              const loginModal = document.getElementById('loginModal');
+              
+              if (userGreeting && loginTriggerLink && authSection) {
+                userGreeting.textContent = `Xin chào, ${data.user.displayName}`;
+                userGreeting.style.display = 'inline-block';
+                loginTriggerLink.style.display = 'none';
+                
+                // Thêm nút đăng xuất
+                const logoutButton = document.createElement('a');
+                logoutButton.href = '/auth/logout';
+                logoutButton.className = 'nav-link';
+                logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
+                authSection.appendChild(logoutButton);
+                
+                // Đóng modal đăng nhập
+                if (loginModal) {
+                  loginModal.style.display = 'none';
+                }
+                
+                // Làm mới trang để cập nhật trạng thái
+                window.location.reload();
+              }
+            } else {
+              // Đăng ký thất bại
+              alert(data.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+            }
+          } catch (error) {
+            console.error('Lỗi đăng ký:', error);
+            alert('Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại sau.');
+          }
         });
       }
 
-      // Xử lý nút Đăng nhập với Google (hiện tại chỉ là placeholder)
+      // Xử lý nút Đăng nhập với Google
       if (googleLoginButton) {
         googleLoginButton.addEventListener("click", () => {
           console.log('Nút "Đăng nhập với Google" đã được nhấp!');
-          alert(
-            "Chức năng đăng nhập bằng Google sẽ được tích hợp tại đây. Hiện tại, đây chỉ là giao diện mẫu."
-          );
-          // if (loginModalElement) loginModalElement.style.display = 'none'; // Tùy chọn: đóng modal sau khi nhấp
+          window.location.href = '/auth/google';
+          if (loginModalElement) loginModalElement.style.display = 'none'; // Đóng modal sau khi nhấp
         });
       }

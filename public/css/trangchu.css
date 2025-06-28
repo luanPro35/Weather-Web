@@ -362,6 +362,15 @@ body.misty::after {
     position: relative;
 }
 
+/* Đảm bảo vị trí không thay đổi khi đăng nhập */
+#user-greeting {
+    margin: 0;
+    padding: 0.5rem 1rem;
+    height: 40px;
+    display: flex;
+    align-items: center;
+}
+
 .search-wrapper {
     position: relative;
     width: 350px;
@@ -379,6 +388,7 @@ body.misty::after {
     outline: none;
     transition: all 0.4s ease;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin-top: 45px;
 }
 
 .search-box:focus {
@@ -400,6 +410,7 @@ body.misty::after {
     color: rgba(255, 255, 255, 0.7);
     font-size: 18px;
     pointer-events: none;
+    margin-top: 22px;
 }
 
 .weather-card {

@@ -2,20 +2,33 @@
 
 ## Giới thiệu
 
-Weather-Web là một ứng dụng web thời tiết với giao diện người dùng được xây dựng bằng Node.js (Express) cho phần frontend và PHP cho phần xác thực người dùng thông qua Google OAuth.
+Weather-Web là một ứng dụng web thời tiết được xây dựng hoàn toàn bằng Node.js (Express) với xác thực người dùng thông qua Google OAuth và sử dụng MySQL làm cơ sở dữ liệu.
 
 ## Cấu trúc dự án
 
 ```
-├── public/                  # Thư mục chứa tài nguyên tĩnh
-│   ├── css/                # Các file CSS
-│   ├── html/               # Các file HTML
-│   └── js/                 # Các file JavaScript
-├── php/                    # Thư mục chứa mã nguồn PHP
-│   ├── vendor/             # Thư mục chứa các thư viện PHP (Composer)
-│   ├── config.php          # Cấu hình PHP
-│   ├── login_with_google.php # Xử lý đăng nhập Google
-│   └── google_oauth_callback.php # Callback xử lý OAuth
+├── config/                 # Thư mục chứa cấu hình
+│   ├── database.js        # Cấu hình kết nối MySQL
+│   ├── index.js           # Cấu hình chung
+│   ├── middleware.js      # Cấu hình middleware
+│   └── passport.js        # Cấu hình xác thực Passport
+├── models/                 # Thư mục chứa mô hình dữ liệu
+│   ├── init-db.js         # Khởi tạo cơ sở dữ liệu
+│   └── sequelize/         # Mô hình Sequelize
+│       ├── index.js       # Cấu hình Sequelize
+│       └── User.js        # Mô hình User
+├── public/                 # Thư mục chứa tài nguyên tĩnh
+│   ├── css/               # Các file CSS
+│   ├── html/              # Các file HTML
+│   └── js/                # Các file JavaScript
+├── routes/                 # Thư mục chứa định tuyến
+│   ├── auth.js            # Định tuyến xác thực
+│   └── index.js           # Định tuyến chính
+├── views/                  # Thư mục chứa giao diện EJS
+│   ├── layout.ejs         # Bố cục chung
+│   ├── login.ejs          # Trang đăng nhập
+│   └── profile.ejs        # Trang hồ sơ
+├── create-mysql-db.js      # Script tạo cơ sở dữ liệu
 ├── loading.html            # Trang loading
 ├── server.js              # Máy chủ Node.js
 └── package.json           # Cấu hình dự án Node.js
@@ -24,9 +37,8 @@ Weather-Web là một ứng dụng web thời tiết với giao diện người 
 ## Yêu cầu hệ thống
 
 - Node.js (v14 trở lên)
-- PHP (v7.4 trở lên)
-- MySQL
-- Composer (đã cài đặt)
+- MySQL (v5.7 trở lên)
+- npm (v6 trở lên)
 
 ## Cài đặt và chạy ứng dụng
 
@@ -36,26 +48,27 @@ Weather-Web là một ứng dụng web thời tiết với giao diện người 
 npm install
 ```
 
-### 2. Cài đặt các gói phụ thuộc PHP (nếu chưa cài đặt)
-
-```bash
-cd php
-composer install
-```
-
-### 3. Cấu hình MySQL
+### 2. Cấu hình MySQL
 
 - Đảm bảo dịch vụ MySQL đang chạy
-- Tạo cơ sở dữ liệu và bảng `users` theo cấu trúc trong file `php/test_db.php`
-
-### 4. Cấu hình PHP
-
-- Đảm bảo extension mysqli đã được bật trong php.ini
-- Tạo file `.env` trong thư mục `php/` dựa trên file `.env.example`:
+- Tạo cơ sở dữ liệu bằng cách chạy script:
 
 ```bash
-cd php
-cp .env.example .env
+node create-mysql-db.js
+```
+
+Hoặc sử dụng file batch:
+
+```bash
+create-mysql-db.bat
+```
+
+### 3. Cấu hình môi trường
+
+- Tạo file `.env` dựa trên file `.env.example`:
+
+```bash
+copy .env.example .env
 ```
 
 - Chỉnh sửa file `.env` để thêm thông tin xác thực Google OAuth và cấu hình cơ sở dữ liệu:
@@ -63,31 +76,60 @@ cp .env.example .env
 ```
 GOOGLE_CLIENT_ID=your_google_client_id_here
 GOOGLE_CLIENT_SECRET=your_google_client_secret_here
-GOOGLE_REDIRECT_URI=http://localhost/weathery/php/google_oauth_callback.php
+GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback
 
 DB_HOST=localhost
 DB_USERNAME=root
 DB_PASSWORD=your_password_here
 DB_NAME=weather
+
+PORT=3000
+NODE_ENV=development
 ```
 
-### 5. Chạy ứng dụng
+### 4. Thiết lập và chạy ứng dụng
 
-#### Chạy phần frontend (Node.js)
+#### Thiết lập tự động
+
+Sử dụng script thiết lập tự động để cài đặt các gói phụ thuộc và tạo cơ sở dữ liệu:
+
+```bash
+setup.bat
+```
+
+Hoặc sử dụng npm:
+
+```bash
+npm run setup
+```
+
+#### Chạy ứng dụng
+
+**Chế độ phát triển:**
+
+```bash
+start_node.bat
+```
+
+hoặc
+
+```bash
+npm run dev
+```
+
+**Chế độ sản xuất:**
+
+```bash
+start_node_prod.bat
+```
+
+hoặc
 
 ```bash
 npm start
 ```
 
 Ứng dụng sẽ chạy tại http://localhost:3000
-
-#### Cấu hình phần backend (PHP)
-
-Để phần xác thực Google OAuth hoạt động, bạn cần:
-
-1. Đặt thư mục `php` vào thư mục web server của bạn (ví dụ: `C:\xampp\htdocs\weathery\php` hoặc thư mục web server tương ứng)
-2. Đảm bảo đường dẫn trong các file HTML trỏ đến đúng vị trí của file PHP:
-   - Đường dẫn mặc định: `http://localhost/weathery/php/login_with_google.php`
 
 ## Sử dụng ứng dụng
 
@@ -97,8 +139,24 @@ npm start
 
 ## Xử lý sự cố
 
-- Nếu gặp lỗi kết nối cơ sở dữ liệu, hãy kiểm tra cấu hình MySQL trong file `.env`
+### Lỗi kết nối MySQL
+
+- Đảm bảo dịch vụ MySQL đang chạy
+- Kiểm tra cấu hình kết nối trong file `.env` (host, username, password, database name)
+- Đảm bảo cơ sở dữ liệu đã được tạo (sử dụng `create-mysql-db.bat` hoặc tạo thủ công)
+- Kiểm tra quyền truy cập của người dùng MySQL
+
+### Lỗi xác thực Google OAuth
+
+- Đảm bảo đã cấu hình đúng Google Client ID và Client Secret trong file `.env`
+- Kiểm tra URL callback đã được cấu hình đúng trong Google Cloud Console
+- Đảm bảo URL callback trong file `.env` khớp với URL đã đăng ký trong Google Cloud Console
 - Nếu gặp lỗi đăng nhập Google, hãy kiểm tra cấu hình Google API trong file `.env`
-- Nếu gặp lỗi "Class mysqli not found", hãy đảm bảo extension mysqli đã được bật trong php.ini
-- Nếu gặp lỗi "Class 'Dotenv\Dotenv' not found", hãy chạy lệnh `composer install` trong thư mục `php/`
 - Nếu gặp lỗi khi đẩy code lên GitHub, hãy đảm bảo không đẩy file `.env` chứa thông tin nhạy cảm
+
+### Lỗi cổng đã được sử dụng (EADDRINUSE)
+
+- Nếu gặp lỗi "Error: listen EADDRINUSE: address already in use :::3000", có nghĩa là cổng 3000 đã được sử dụng bởi một ứng dụng khác
+- Bạn có thể thay đổi cổng trong file `.env` bằng cách đặt giá trị PORT thành một cổng khác (ví dụ: 3001, 8080, 8000)
+- Hoặc bạn có thể dừng ứng dụng đang sử dụng cổng 3000 trước khi khởi động ứng dụng này
+- Từ phiên bản mới nhất, ứng dụng sẽ tự động thử sử dụng cổng tiếp theo nếu cổng mặc định đã được sử dụng
