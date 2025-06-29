@@ -26,6 +26,13 @@ module.exports = {
     app: {
         port: process.env.PORT || 3000,
         environment: process.env.NODE_ENV || 'development',
-        sessionSecret: 'weather-web-secret'
+        sessionSecret: 'weather-web-secret',
+        baseUrl: process.env.BASE_URL || 'http://localhost:3000'
+    },
+    
+    // Weather API settings
+    weather: {
+        apiKey: process.env.WEATHER_API_KEY || 'your-openweathermap-api-key',
+        baseUrl: 'https://api.openweathermap.org/data/2.5'
     }
 };

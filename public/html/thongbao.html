@@ -225,7 +225,7 @@
           </div>
         </div>
 
-        <!-- Thông báo email -->
+        <!-- Thông báo email hàng ngày -->
         <div class="notification-card">
           <div class="card-header">
             <div
@@ -234,15 +234,14 @@
             >
               <i class="fas fa-envelope"></i>
             </div>
-            <div class="card-title">Báo cáo email hàng tuần</div>
+            <div class="card-title">Thông báo email hàng ngày</div>
           </div>
           <div class="card-description">
-            Nhận báo cáo thời tiết chi tiết qua email với biểu đồ, xu hướng và
-            lời khuyên cho tuần tới.
+            Nhận báo cáo thời tiết chi tiết qua email hàng ngày với dự báo và lời khuyên phù hợp.
           </div>
 
           <label class="toggle-switch">
-            <input type="checkbox" id="emailReports" />
+            <input type="checkbox" id="emailDailyEnabled" />
             <span class="slider"></span>
           </label>
 
@@ -253,11 +252,66 @@
               placeholder="Nhập email của bạn"
               id="emailAddress"
             />
-            <button class="btn btn-primary" onclick="saveEmail()">
-              <i class="fas fa-save"></i>
-              Lưu
-            </button>
           </div>
+          
+          <div class="time-picker-group">
+            <input
+              type="time"
+              class="time-input"
+              id="emailDailyTime"
+              value="07:00"
+            />
+            <select class="time-input" id="emailDailyFrequency">
+              <option value="daily">Hàng ngày</option>
+              <option value="weekdays">Thứ 2-6</option>
+              <option value="weekends">Cuối tuần</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Báo cáo email hàng tuần -->
+        <div class="notification-card">
+          <div class="card-header">
+            <div
+              class="card-icon"
+              style="background: linear-gradient(135deg, #9b59b6, #8e44ad)"
+            >
+              <i class="fas fa-calendar-week"></i>
+            </div>
+            <div class="card-title">Báo cáo email hàng tuần</div>
+          </div>
+          <div class="card-description">
+            Nhận báo cáo thời tiết chi tiết qua email với biểu đồ, xu hướng và
+            lời khuyên cho tuần tới.
+          </div>
+
+          <label class="toggle-switch">
+            <input type="checkbox" id="emailWeeklyEnabled" />
+            <span class="slider"></span>
+          </label>
+
+          <div class="time-picker-group">
+            <select class="time-input" id="emailWeeklyDay">
+              <option value="monday">Thứ Hai</option>
+              <option value="tuesday">Thứ Ba</option>
+              <option value="wednesday">Thứ Tư</option>
+              <option value="thursday">Thứ Năm</option>
+              <option value="friday">Thứ Sáu</option>
+              <option value="saturday">Thứ Bảy</option>
+              <option value="sunday">Chủ Nhật</option>
+            </select>
+            <input
+              type="time"
+              class="time-input"
+              id="emailWeeklyTime"
+              value="08:00"
+            />
+          </div>
+          
+          <button class="btn btn-primary" id="saveEmailSettings">
+            <i class="fas fa-save"></i>
+            Lưu cài đặt email
+          </button>
         </div>
 
         <!-- Thông báo hoạt động ngoài trời -->

@@ -23,6 +23,20 @@ const userSchema = new mongoose.Schema({
     image: {
         type: String
     },
+    favoriteCities: {
+        type: String,
+        default: '[]',
+        get: function(data) {
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                return [];
+            }
+        },
+        set: function(data) {
+            return JSON.stringify(data);
+        }
+    },
     createdAt: {
         type: Date,
         default: Date.now

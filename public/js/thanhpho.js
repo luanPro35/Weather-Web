@@ -4,6 +4,7 @@ let isLoading = false;
 const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Your API key
 const DEFAULT_CITY_FOR_BACKGROUND = "Da Nang"; // Fallback default city for page background
 let currentSuggestionIndex = -1; // For keyboard navigation of suggestions
+let isUserLoggedIn = false; // Trạng thái đăng nhập của người dùng
 
 // Updated to use a prominent city within the province for better API recognition
 const vietnameseProvinces = [
@@ -103,32 +104,38 @@ function showSection(sectionName, navLinkElement) {
 }
 
 // Initialize the app
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // Kiểm tra trạng thái đăng nhập
-    fetch('/api/user')
-        .then(response => response.json())
-        .then(data => {
-            if (data.isAuthenticated) {
-                // Hiển thị thông tin người dùng đã đăng nhập
-                const userGreeting = document.getElementById('user-greeting');
-                const authSection = document.getElementById('auth-section');
-                const loginTriggerLink = document.getElementById('loginTriggerLink');
+    try {
+        const response = await fetch('/api/user');
+        const data = await response.json();
+        if (data.isAuthenticated) {
+            // Hiển thị thông tin người dùng đã đăng nhập
+            const userGreeting = document.getElementById('user-greeting');
+            const authSection = document.getElementById('auth-section');
+            const loginTriggerLink = document.getElementById('loginTriggerLink');
+            
+            if (userGreeting && authSection && loginTriggerLink) {
+                userGreeting.textContent = `Xin chào, ${data.user.displayName}`;
+                userGreeting.style.display = 'inline-block';
+                loginTriggerLink.style.display = 'none';
                 
-                if (userGreeting && authSection && loginTriggerLink) {
-                    userGreeting.textContent = `Xin chào, ${data.user.displayName}`;
-                    userGreeting.style.display = 'inline-block';
-                    loginTriggerLink.style.display = 'none';
-                    
-                    // Thêm nút đăng xuất
-                    const logoutButton = document.createElement('a');
-                    logoutButton.href = '/auth/logout';
-                    logoutButton.className = 'nav-link';
-                    logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
-                    authSection.appendChild(logoutButton);
-                }
+                // Thêm nút đăng xuất
+                const logoutButton = document.createElement('a');
+                logoutButton.href = '/auth/logout';
+                logoutButton.className = 'nav-link';
+                logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
+                // Thêm sự kiện click để xóa dữ liệu localStorage khi đăng xuất
+                logoutButton.addEventListener('click', function(e) {
+                    // Xóa dữ liệu thành phố yêu thích khỏi localStorage
+                    localStorage.removeItem('favoriteCities');
+                });
+                authSection.appendChild(logoutButton);
             }
-        })
-        .catch(error => console.error('Lỗi khi kiểm tra trạng thái đăng nhập:', error));
+        }
+    } catch (error) {
+        console.error('Lỗi khi kiểm tra trạng thái đăng nhập:', error);
+    }
 
     // Set active link and show main section for current page
     const citiesNavLink = Array.from(document.querySelectorAll('.nav-link')).find(link => {
@@ -140,7 +147,8 @@ document.addEventListener('DOMContentLoaded', function() {
         showSection('citiesPage', citiesNavLink);
     }
 
-    loadFavoriteCities();
+    // Tải thành phố yêu thích từ server hoặc localStorage
+    await loadFavoriteCities();
     setupEventListeners();    
     updateDisplay();
     loadBackgroundBasedOnLocation(DEFAULT_CITY_FOR_BACKGROUND); // Set initial page background
@@ -240,6 +248,11 @@ document.addEventListener('DOMContentLoaded', function() {
               logoutButton.href = '/auth/logout';
               logoutButton.className = 'nav-link';
               logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
+              // Thêm sự kiện click để xóa dữ liệu localStorage khi đăng xuất
+              logoutButton.addEventListener('click', function(e) {
+                  // Xóa dữ liệu thành phố yêu thích khỏi localStorage
+                  localStorage.removeItem('favoriteCities');
+              });
               authSection.appendChild(logoutButton);
               
               // Đóng modal đăng nhập
@@ -309,6 +322,11 @@ document.addEventListener('DOMContentLoaded', function() {
               logoutButton.href = '/auth/logout';
               logoutButton.className = 'nav-link';
               logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
+              // Thêm sự kiện click để xóa dữ liệu localStorage khi đăng xuất
+              logoutButton.addEventListener('click', function(e) {
+                  // Xóa dữ liệu thành phố yêu thích khỏi localStorage
+                  localStorage.removeItem('favoriteCities');
+              });
               authSection.appendChild(logoutButton);
               
               // Đóng modal đăng nhập
@@ -428,7 +446,173 @@ function clearSuggestions(suggestionsWrapper) {
     }
 }
 // Load favorite cities from localStorage
-function loadFavoriteCities() {
+// Biến để theo dõi trạng thái đăng nhập
+// Initialize login status flag
+// isUserLoggedIn đã được khai báo ở đầu file
+let currentUser = null;
+
+async function checkLoginStatus() {
+    try {
+        const response = await fetch('/api/user');
+        const data = await response.json();
+        isUserLoggedIn = data.isAuthenticated;
+        if (data.isAuthenticated) {
+            currentUser = data.user;
+        } else {
+            currentUser = null;
+        }
+        return data.isAuthenticated;
+    } catch (error) {
+        console.error('Lỗi khi kiểm tra trạng thái đăng nhập:', error);
+        currentUser = null;
+        return false;
+    }
+}
+
+async function loadFavoriteCities() {
+    // Kiểm tra trạng thái đăng nhập
+    const isLoggedIn = await checkLoginStatus();
+    
+    // Cập nhật giao diện để hiển thị trạng thái đăng nhập
+    updateLoginStatusDisplay();
+    
+    if (isLoggedIn) {
+        // Nếu đã đăng nhập, lấy thành phố yêu thích từ server
+        try {
+            // Xóa dữ liệu localStorage để tránh hiển thị dữ liệu của tài khoản trước
+            localStorage.removeItem('favoriteCities');
+            
+            const response = await fetch('/api/favorite-cities');
+            const data = await response.json();
+            
+            if (data.success) {
+                favoriteCities = data.favoriteCities.map(city => ({
+                    id: city.id || Date.now(),
+                    name: city.name,
+                    temp: city.temp,
+                    condition: city.condition,
+                    icon: city.icon,
+                    description: city.description,
+                    addedAt: city.addedAt || new Date().toISOString(),
+                    newlyAdded: false
+                }));
+                showNotification('Đã tải danh sách thành phố yêu thích của bạn', 'success');
+            } else {
+                console.error('Lỗi khi lấy thành phố yêu thích:', data.message);
+                // Khởi tạo danh sách trống thay vì sử dụng localStorage
+                favoriteCities = [];
+                showNotification('Không thể tải danh sách từ server', 'info');
+            }
+        } catch (error) {
+            console.error('Lỗi khi lấy thành phố yêu thích từ server:', error);
+            // Khởi tạo danh sách trống thay vì sử dụng localStorage
+            favoriteCities = [];
+            showNotification('Không thể kết nối đến server', 'info');
+        }
+    } else {
+        // Nếu chưa đăng nhập, lấy từ localStorage
+        loadFromLocalStorage();
+        showNotification('Bạn đang sử dụng chế độ khách. Đăng nhập để lưu thành phố yêu thích trên nhiều thiết bị!', 'info');
+    }
+}
+
+// Hàm cập nhật giao diện hiển thị trạng thái đăng nhập
+function updateLoginStatusDisplay() {
+    const loginStatusInfo = document.getElementById('login-status-info');
+    if (!loginStatusInfo) {
+        // Tạo phần tử hiển thị trạng thái đăng nhập nếu chưa có
+        const container = document.querySelector('.favorite-cities-container');
+        if (container) {
+            const statusElement = document.createElement('div');
+            statusElement.id = 'login-status-info';
+            statusElement.className = 'login-status-info';
+            
+            if (isUserLoggedIn && currentUser) {
+                statusElement.innerHTML = `
+                    <div class="user-status logged-in">
+                        <i class="fas fa-user-check"></i>
+                        <span>Bạn đang đăng nhập với tài khoản <strong>${currentUser.displayName || currentUser.email}</strong></span>
+                        <div class="status-description">Danh sách thành phố yêu thích của bạn sẽ được đồng bộ trên tất cả thiết bị</div>
+                    </div>
+                `;
+            } else {
+                statusElement.innerHTML = `
+                    <div class="user-status guest-mode">
+                        <i class="fas fa-user-clock"></i>
+                        <span>Bạn đang sử dụng chế độ khách</span>
+                        <div class="status-description">Danh sách thành phố yêu thích chỉ được lưu trên thiết bị này. 
+                        <a href="#" id="login-prompt-link">Đăng nhập</a> để lưu trên tất cả thiết bị!</div>
+                    </div>
+                `;
+            }
+            
+            // Chèn vào đầu container, sau phần add-city-form
+            const addCityForm = container.querySelector('.add-city-form');
+            if (addCityForm) {
+                container.insertBefore(statusElement, addCityForm.nextSibling);
+                
+                // Thêm sự kiện cho link đăng nhập nếu ở chế độ khách
+                if (!isUserLoggedIn) {
+                    const loginPromptLink = document.getElementById('login-prompt-link');
+                    if (loginPromptLink) {
+                        loginPromptLink.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const loginModal = document.getElementById('loginModal');
+                            if (loginModal) {
+                                loginModal.style.display = 'flex';
+                                const loginView = document.getElementById('loginView');
+                                const registerView = document.getElementById('registerView');
+                                if (loginView && registerView) {
+                                    loginView.style.display = 'block';
+                                    registerView.style.display = 'none';
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    } else {
+        // Cập nhật phần tử hiển thị trạng thái đăng nhập nếu đã có
+        if (isUserLoggedIn && currentUser) {
+            loginStatusInfo.innerHTML = `
+                <div class="user-status logged-in">
+                    <i class="fas fa-user-check"></i>
+                </div>
+            `;
+        } else {
+            loginStatusInfo.innerHTML = `
+                <div class="user-status guest-mode">
+                    <i class="fas fa-user-clock"></i>
+                    <span>Bạn đang sử dụng chế độ khách</span>
+                    <div class="status-description">Danh sách thành phố yêu thích chỉ được lưu trên thiết bị này. 
+                    <a href="#" id="login-prompt-link">Đăng nhập</a> để lưu trên tất cả thiết bị!</div>
+                </div>
+            `;
+            
+            // Thêm sự kiện cho link đăng nhập nếu ở chế độ khách
+            const loginPromptLink = document.getElementById('login-prompt-link');
+            if (loginPromptLink) {
+                loginPromptLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const loginModal = document.getElementById('loginModal');
+                    if (loginModal) {
+                        loginModal.style.display = 'flex';
+                        const loginView = document.getElementById('loginView');
+                        const registerView = document.getElementById('registerView');
+                        if (loginView && registerView) {
+                            loginView.style.display = 'block';
+                            registerView.style.display = 'none';
+                        }
+                    }
+                });
+            }
+        }
+    }
+}
+
+// Hàm để tải thành phố yêu thích từ localStorage
+function loadFromLocalStorage() {
     const stored = JSON.parse(localStorage.getItem('favoriteCities') || '[]');
     // Ensure loaded cities have necessary properties if they were saved in an older format
     favoriteCities = stored.map(city => ({
@@ -443,9 +627,45 @@ function loadFavoriteCities() {
     }));
 }
 
-// Save favorite cities to localStorage
-function saveFavoriteCities() {
+// Save favorite cities
+async function saveFavoriteCities() {
+    // Lưu vào localStorage trong mọi trường hợp (để dự phòng)
     localStorage.setItem('favoriteCities', JSON.stringify(favoriteCities));
+    
+    // Nếu đã đăng nhập, lưu lên server
+    if (isUserLoggedIn) {
+        try {
+            // Hiển thị thông báo đang lưu
+            const savingNotification = showNotification('Đang lưu danh sách thành phố yêu thích...', 'info', false);
+            
+            const response = await fetch('/api/favorite-cities', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ favoriteCities })
+            });
+            
+            // Xóa thông báo đang lưu
+            if (savingNotification && savingNotification.parentNode) {
+                savingNotification.parentNode.removeChild(savingNotification);
+            }
+            
+            const data = await response.json();
+            if (data.success) {
+                showNotification(`Đã lưu danh sách thành phố yêu thích cho tài khoản ${currentUser.displayName || currentUser.email}`, 'success');
+            } else {
+                console.error('Lỗi khi lưu thành phố yêu thích lên server:', data.message);
+                showNotification('Không thể lưu danh sách lên server. Đã lưu cục bộ.', 'error');
+            }
+        } catch (error) {
+            console.error('Lỗi khi lưu thành phố yêu thích lên server:', error);
+            showNotification('Không thể kết nối đến server. Đã lưu cục bộ.', 'error');
+        }
+    } else {
+        // Nếu chưa đăng nhập, chỉ hiển thị thông báo đã lưu cục bộ
+        showNotification('Đã lưu danh sách thành phố yêu thích vào thiết bị này', 'info');
+    }
 }
 
 // Handle adding a new city
@@ -482,11 +702,19 @@ async function handleAddCity() {
             };
 
             favoriteCities.push(newCity);
-            saveFavoriteCities();
             input.value = '';
             input.dataset.query = ''; // Clear the selected query
             updateDisplay(); // Gọi renderCities để cập nhật giao diện
-            showNotification(`Đã thêm ${canonicalCityName} vào danh sách!`, 'success'); // Thông báo thành công
+            
+            // Lưu thành phố yêu thích và hiển thị thông báo phù hợp
+            await saveFavoriteCities();
+            
+            // Thông báo thêm thành công đã được hiển thị trong saveFavoriteCities
+            if (isUserLoggedIn && currentUser) {
+                showNotification(`Đã thêm ${canonicalCityName} vào danh sách yêu thích của ${currentUser.displayName}!`, 'success');
+            } else {
+                showNotification(`Đã thêm ${canonicalCityName} vào danh sách yêu thích trên thiết bị này!`, 'success');
+            }
         } else {
             // Nếu weatherData là null, có nghĩa là getWeatherData đã ném lỗi
             // và lỗi đó đã được bắt ở đây. Chúng ta sẽ ném lại lỗi để hiển thị thông báo.
@@ -615,12 +843,19 @@ function updateDisplay() {
 }
 
 // Remove a city
-function removeCity(index) {
+async function removeCity(index) {
     const cityName = favoriteCities[index].name;
     favoriteCities.splice(index, 1);
-    saveFavoriteCities();
-    updateDisplay();
-    showNotification(`Đã xóa ${cityName} khỏi danh sách!`, 'success');
+    updateDisplay(); // Cập nhật giao diện ngay lập tức
+    
+    // Lưu thay đổi và hiển thị thông báo phù hợp
+    await saveFavoriteCities();
+    
+    if (isUserLoggedIn && currentUser) {
+        showNotification(`Đã xóa ${cityName} khỏi danh sách yêu thích của ${currentUser.displayName}!`, 'success');
+    } else {
+        showNotification(`Đã xóa ${cityName} khỏi danh sách yêu thích trên thiết bị này!`, 'success');
+    }
 }
 window.removeCity = removeCity; // Make it global for onclick
 
@@ -629,27 +864,49 @@ async function refreshCityWeather(index) {
     const cityToRefresh = favoriteCities[index];
     if (!cityToRefresh) return;
 
-    // Indicate loading on the specific item (more advanced UI needed for this)
-    // For now, we'll use a console log or a simple global indicator
-    console.log(`Refreshing weather for ${cityToRefresh.name}...`);
-    // You could add a spinner class to the specific city item here
+    // Hiển thị thông báo đang làm mới
+    const refreshingNotification = showNotification(`Đang cập nhật thời tiết cho ${cityToRefresh.name}...`, 'info', false);
+    
+    // Thêm hiệu ứng loading cho item thành phố
+    const cityItems = document.querySelectorAll('.favorite-city-item');
+    if (cityItems[index]) {
+        cityItems[index].classList.add('refreshing');
+    }
 
     try {
         const weatherData = await getWeatherData(cityToRefresh.name);
         if (weatherData) {
             // Update data, keep existing properties, ensure newlyAdded is false
             favoriteCities[index] = { ...cityToRefresh, ...weatherData, newlyAdded: false };
-            saveFavoriteCities();
+            await saveFavoriteCities(); // Lưu thay đổi
             updateDisplay(); // Re-render the list to show updated data
-            showNotification(`Đã cập nhật thời tiết cho ${cityToRefresh.name}!`, 'success');
+            
+            // Xóa thông báo đang làm mới
+            if (refreshingNotification && refreshingNotification.parentNode) {
+                refreshingNotification.parentNode.removeChild(refreshingNotification);
+            }
+            
+            // Hiển thị thông báo thành công phù hợp
+            if (isUserLoggedIn && currentUser) {
+                showNotification(`Đã cập nhật thời tiết cho ${cityToRefresh.name} trong danh sách của ${currentUser.displayName}!`, 'success');
+            } else {
+                showNotification(`Đã cập nhật thời tiết cho ${cityToRefresh.name}!`, 'success');
+            }
         } else {
             showNotification(`Không thể làm mới thời tiết cho ${cityToRefresh.name}.`, 'error');
         }
     } catch (error) {
         showNotification(`Lỗi khi làm mới thời tiết cho ${cityToRefresh.name}!`, 'error');
     } finally {
-        // Remove loading indicator from the specific city item
-        console.log(`Finished refreshing weather for ${cityToRefresh.name}.`);
+        // Xóa thông báo đang làm mới nếu vẫn còn
+        if (refreshingNotification && refreshingNotification.parentNode) {
+            refreshingNotification.parentNode.removeChild(refreshingNotification);
+        }
+        
+        // Xóa hiệu ứng loading cho item thành phố
+        if (cityItems[index]) {
+            cityItems[index].classList.remove('refreshing');
+        }
     }
 }
 window.refreshCityWeather = refreshCityWeather; // Make it global for onclick
@@ -668,7 +925,7 @@ function setLoading(loading, isRefresh = false) {
 }
 
 // Show notification
-function showNotification(message, type = 'info') { // type can be 'info', 'success', 'error'
+function showNotification(message, type = 'info', autoHide = true) { // type can be 'info', 'success', 'error'
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
@@ -679,12 +936,19 @@ function showNotification(message, type = 'info') { // type can be 'info', 'succ
 
     notification.classList.add('show');
 
-    setTimeout(() => {
-        notification.classList.remove('show');
+    if (autoHide) {
         setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300); // Match transition duration
-    }, 3000); // Notification disappears after 3 seconds
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) { // Check if still in DOM
+                    document.body.removeChild(notification);
+                }
+            }, 300); // Match transition duration
+        }, 3000); // Notification disappears after 3 seconds
+    }
+    
+    // Return the notification element so it can be manually removed if needed
+    return notification;
 }
 window.showNotification = showNotification; // Make it global if needed elsewhere
 

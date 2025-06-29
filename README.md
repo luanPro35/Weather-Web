@@ -4,6 +4,14 @@
 
 Weather-Web là một ứng dụng web thời tiết được xây dựng hoàn toàn bằng Node.js (Express) với xác thực người dùng thông qua Google OAuth và sử dụng MySQL làm cơ sở dữ liệu.
 
+## Tính năng chính
+
+- Xem thông tin thời tiết hiện tại và dự báo
+- Đăng nhập bằng tài khoản Google
+- Lưu các thành phố yêu thích
+- Nhận thông báo email về thời tiết hàng ngày
+- Cảnh báo thời tiết khắc nghiệt
+
 ## Cấu trúc dự án
 
 ```
@@ -48,46 +56,99 @@ Weather-Web là một ứng dụng web thời tiết được xây dựng hoàn 
 npm install
 ```
 
-### 2. Cấu hình MySQL
+### 2. Cấu hình môi trường
 
-- Đảm bảo dịch vụ MySQL đang chạy
-- Tạo cơ sở dữ liệu bằng cách chạy script:
+Sao chép file `.env.example` thành `.env` và cập nhật các thông tin cấu hình:
+
+```bash
+cp .env.example .env
+```
+
+Sau đó, mở file `.env` và cập nhật các thông tin sau:
+- Thông tin xác thực Google OAuth
+- Thông tin kết nối cơ sở dữ liệu
+- Thông tin email (xem phần "Cấu hình Email" bên dưới)
+
+### 3. Tạo cơ sở dữ liệu
 
 ```bash
 node create-mysql-db.js
 ```
 
-Hoặc sử dụng file batch:
+Hoặc chạy file batch:
 
 ```bash
 create-mysql-db.bat
 ```
 
-### 3. Cấu hình môi trường
-
-- Tạo file `.env` dựa trên file `.env.example`:
+### 4. Khởi động ứng dụng
 
 ```bash
-copy .env.example .env
+node server.js
 ```
 
-- Chỉnh sửa file `.env` để thêm thông tin xác thực Google OAuth và cấu hình cơ sở dữ liệu:
+Hoặc chạy file batch:
 
-```
-GOOGLE_CLIENT_ID=your_google_client_id_here
-GOOGLE_CLIENT_SECRET=your_google_client_secret_here
-GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback
-
-DB_HOST=localhost
-DB_USERNAME=root
-DB_PASSWORD=your_password_here
-DB_NAME=weather
-
-PORT=3000
-NODE_ENV=development
+```bash
+start_node.bat
 ```
 
-### 4. Thiết lập và chạy ứng dụng
+### 5. Cấu hình MySQL
+
+- Đảm bảo dịch vụ MySQL đang chạy
+- Tạo cơ sở dữ liệu `weather` (script `create-mysql-db.js` sẽ tự động thực hiện điều này)
+- Cập nhật thông tin kết nối trong file `.env`
+
+## Cấu hình Email
+
+Ứng dụng sử dụng Gmail SMTP để gửi thông báo email. Để cấu hình:
+
+### 1. Tạo App Password cho Gmail
+
+Nếu bạn đã bật xác thực 2 bước cho tài khoản Google, bạn cần tạo App Password:
+
+1. Truy cập https://myaccount.google.com/security
+2. Đảm bảo đã bật "Xác minh 2 bước"
+3. Truy cập https://myaccount.google.com/apppasswords
+4. Chọn "Khác (Tên tùy chỉnh)" và đặt tên "Weather App"
+5. Nhấn "Tạo" và sao chép mật khẩu 16 ký tự được tạo ra
+
+### 2. Cập nhật file `.env`
+
+```
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+```
+
+### 3. Kiểm tra kết nối email
+
+Chạy script kiểm tra kết nối email:
+
+```bash
+node test-email-connection.js
+```
+
+Hoặc sử dụng file batch:
+
+```bash
+test-email.bat
+```
+
+### Khắc phục lỗi email
+
+Nếu gặp lỗi kết nối email, vui lòng tham khảo hướng dẫn chi tiết trong file `EMAIL_TROUBLESHOOTING.md`.
+
+## Tài liệu bổ sung
+
+- `HOW_TO_RUN.md` - Hướng dẫn chi tiết cách chạy ứng dụng
+- `EMAIL_TROUBLESHOOTING.md` - Hướng dẫn khắc phục lỗi kết nối email
+- `README_NODE.md` - Thông tin về phiên bản Node.js
+
+## Liên hệ
+
+Nếu bạn có bất kỳ câu hỏi hoặc góp ý nào, vui lòng liên hệ với chúng tôi qua email.
+
+## Thiết lập và chạy ứng dụng
 
 #### Thiết lập tự động
 

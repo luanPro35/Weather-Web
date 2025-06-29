@@ -175,6 +175,72 @@ input:checked+.slider:before {
     margin-bottom: 40px;
 }
 
+/* Styles for login status info */
+.login-status-info {
+    margin: 0 auto 30px auto;
+    max-width: 700px;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.user-status {
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.user-status i {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.user-status span {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.user-status .status-description {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+.user-status.logged-in {
+    background: rgba(76, 175, 80, 0.2);
+    border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.user-status.guest-mode {
+    background: rgba(255, 193, 7, 0.2);
+    border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+.user-status.logged-in i {
+    color: #4CAF50;
+}
+
+.user-status.guest-mode i {
+    color: #FFC107;
+}
+
+.status-description a {
+    color: #ffffff;
+    text-decoration: underline;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.status-description a:hover {
+    color: #FFC107;
+    text-decoration: none;
+}
+
 .add-city-form {
     display: flex;
     gap: 20px;
@@ -260,7 +326,7 @@ input:checked+.slider:before {
     color: white;
     border: 2px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    margin-bottom: 30px;
+    margin-bottom: -17px;
 }
 
 .btn-primary:hover {

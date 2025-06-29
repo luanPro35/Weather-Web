@@ -4,6 +4,7 @@ const passport = require('passport');
 const session = require('express-session');
 const config = require('./config');
 const initializeDatabase = require('./models/init-db');
+const emailService = require('./config/email');
 
 // Initialize Express app
 const app = express();
@@ -40,6 +41,20 @@ app.get('/', (req, res) => {
 initializeDatabase()
     .then(() => {
         console.log('Đã khởi tạo cơ sở dữ liệu thành công.');
+        
+        // Khởi động dịch vụ email và lên lịch gửi thông báo
+        emailService.verifyEmailConnection()
+            .then(isConnected => {
+                if (isConnected) {
+                    emailService.scheduleEmailNotifications();
+                    console.log('Đã khởi động dịch vụ email thành công.');
+                } else {
+                    console.warn('Không thể kết nối đến dịch vụ email. Tính năng thông báo email sẽ không hoạt động.');
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi khi khởi động dịch vụ email:', err);
+            });
     })
     .catch(err => {
         console.error('Lỗi khi khởi tạo cơ sở dữ liệu:', err);
@@ -47,16 +62,49 @@ initializeDatabase()
 
 // Thử lắng nghe trên cổng được cấu hình, nếu bị lỗi thì thử cổng khác
 const startServer = (portToUse) => {
-    const server = app.listen(portToUse, () => {
-        console.log(`Server running at http://localhost:${portToUse}`);
-    }).on('error', (err) => {
-        if (err.code === 'EADDRINUSE') {
-            console.log(`Cổng ${portToUse} đã được sử dụng, đang thử cổng ${portToUse + 1}...`);
-            startServer(portToUse + 1);
-        } else {
-            console.error('Lỗi khi khởi động server:', err);
-        }
-    });
+    // Kiểm tra giới hạn cổng hợp lệ
+    if (portToUse >= 65536) {
+        console.error('Không thể tìm thấy cổng khả dụng trong phạm vi hợp lệ (0-65535).');
+        return;
+    }
+    
+    // Nếu cổng là 3000 và bị sử dụng, thử cổng 8080 thay vì tăng dần
+    if (portToUse === 3000) {
+        const nextPort = 8080;
+        const server = app.listen(portToUse, () => {
+            const url = `http://localhost:${portToUse}`;
+            console.log('\x1b[36m%s\x1b[0m', `Server đang chạy tại: ${url}`);
+            console.log('\x1b[32m%s\x1b[0m', `Bạn có thể truy cập ứng dụng tại: ${url}`);
+            console.log('\x1b[33m%s\x1b[0m', `Mở trình duyệt và nhập địa chỉ: ${url}`);
+            console.log('\x1b[35m%s\x1b[0m', `Trong PowerShell: Nhấn Ctrl và click vào URL để mở trình duyệt`);
+            console.log('\x1b[35m%s\x1b[0m', `Trong CMD: Nhấp chuột phải vào URL và chọn "Open Hyperlink"`);
+        }).on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                console.log(`Cổng ${portToUse} đã được sử dụng, đang thử cổng ${nextPort}...`);
+                startServer(nextPort);
+            } else {
+                console.error('Lỗi khi khởi động server:', err);
+            }
+        });
+    } else {
+        // Nếu không phải cổng 3000, thử tăng thêm 1 nhưng không vượt quá 9999
+        const nextPort = portToUse < 9999 ? portToUse + 1 : 3000;
+        const server = app.listen(portToUse, () => {
+            const url = `http://localhost:${portToUse}`;
+            console.log('\x1b[36m%s\x1b[0m', `Server đang chạy tại: ${url}`);
+            console.log('\x1b[32m%s\x1b[0m', `Bạn có thể truy cập ứng dụng tại: ${url}`);
+            console.log('\x1b[33m%s\x1b[0m', `Mở trình duyệt và nhập địa chỉ: ${url}`);
+            console.log('\x1b[35m%s\x1b[0m', `Trong PowerShell: Nhấn Ctrl và click vào URL để mở trình duyệt`);
+            console.log('\x1b[35m%s\x1b[0m', `Trong CMD: Nhấp chuột phải vào URL và chọn "Open Hyperlink"`);
+        }).on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                console.log(`Cổng ${portToUse} đã được sử dụng, đang thử cổng ${nextPort}...`);
+                startServer(nextPort);
+            } else {
+                console.error('Lỗi khi khởi động server:', err);
+            }
+        });
+    }
 };
 
 startServer(port);

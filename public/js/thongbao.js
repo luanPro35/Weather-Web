@@ -20,13 +20,23 @@ document.addEventListener("DOMContentLoaded", () => {
           logoutButton.className = 'nav-link';
           logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
           authSection.appendChild(logoutButton);
+          
+          // Tải cài đặt thông báo email
+          loadEmailNotificationSettings();
         }
       }
     })
     .catch(error => console.error('Lỗi khi kiểm tra trạng thái đăng nhập:', error));
 
-    const emailInput = document.getElementById("emailForNotifications");
-    const saveEmailBtn = document.getElementById("saveEmailBtn");
+    const emailInput = document.getElementById("emailAddress");
+    const emailDailyEnabledCheckbox = document.getElementById("emailDailyEnabled");
+    const emailDailyTimeInput = document.getElementById("emailDailyTime");
+    const emailDailyFrequencySelect = document.getElementById("emailDailyFrequency");
+    const emailWeeklyEnabledCheckbox = document.getElementById("emailWeeklyEnabled");
+    const emailWeeklyDaySelect = document.getElementById("emailWeeklyDay");
+    const emailWeeklyTimeInput = document.getElementById("emailWeeklyTime");
+    const saveEmailSettingsBtn = document.getElementById("saveEmailSettings");
+    
     const notifyRainCheckbox = document.getElementById("notifyRain");
     const notifyHotCheckbox = document.getElementById("notifyHot");
     const notifyWindCheckbox = document.getElementById("notifyWind");
@@ -525,4 +535,123 @@ document.addEventListener("DOMContentLoaded", () => {
         loginModalElement.style.display = 'none'; // Đóng modal sau khi nhấp
       });
     }
+    
+    // Xử lý cài đặt thông báo email
+    function loadEmailNotificationSettings() {
+      fetch('/api/email-notifications')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.emailSettings) {
+            const settings = data.emailSettings;
+            
+            // Điền thông tin email
+            if (emailInput) emailInput.value = settings.email || '';
+            
+            // Cài đặt thông báo hàng ngày
+            if (emailDailyEnabledCheckbox) emailDailyEnabledCheckbox.checked = settings.enabled && settings.dailyWeather.enabled;
+            if (emailDailyTimeInput) emailDailyTimeInput.value = settings.dailyWeather.time || '07:00';
+            if (emailDailyFrequencySelect) emailDailyFrequencySelect.value = settings.dailyWeather.frequency || 'daily';
+            
+            // Cài đặt báo cáo hàng tuần
+            if (emailWeeklyEnabledCheckbox) emailWeeklyEnabledCheckbox.checked = settings.enabled && settings.weeklyReport.enabled;
+            if (emailWeeklyDaySelect) emailWeeklyDaySelect.value = settings.weeklyReport.day || 'monday';
+            if (emailWeeklyTimeInput) emailWeeklyTimeInput.value = settings.weeklyReport.time || '08:00';
+            
+            console.log('Đã tải cài đặt thông báo email thành công');
+          }
+        })
+        .catch(error => console.error('Lỗi khi tải cài đặt thông báo email:', error));
+    }
+    
+    function saveEmailNotificationSettings() {
+      // Kiểm tra xem người dùng đã đăng nhập chưa
+      fetch('/api/user')
+        .then(response => response.json())
+        .then(userData => {
+          if (!userData.isAuthenticated) {
+            alert('Bạn cần đăng nhập để lưu cài đặt thông báo email');
+            document.getElementById('loginTriggerLink').click(); // Mở modal đăng nhập
+            return;
+          }
+          
+          // Người dùng đã đăng nhập, tiến hành lưu cài đặt
+          const emailSettings = {
+            enabled: emailDailyEnabledCheckbox.checked || emailWeeklyEnabledCheckbox.checked,
+            email: emailInput.value,
+            dailyWeather: {
+              enabled: emailDailyEnabledCheckbox.checked,
+              time: emailDailyTimeInput.value,
+              frequency: emailDailyFrequencySelect.value
+            },
+            weeklyReport: {
+              enabled: emailWeeklyEnabledCheckbox.checked,
+              day: emailWeeklyDaySelect.value,
+              time: emailWeeklyTimeInput.value
+            },
+            severeWeather: {
+              enabled: true, // Mặc định bật thông báo thời tiết khắc nghiệt
+              conditions: ['storm', 'heavy-rain', 'extreme-heat', 'fog']
+            }
+          };
+          
+          // Kiểm tra email hợp lệ
+          if (emailSettings.enabled && !isValidEmail(emailInput.value)) {
+            alert('Vui lòng nhập địa chỉ email hợp lệ');
+            return;
+          }
+          
+          // Gửi cài đặt lên server
+          fetch('/api/email-notifications', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ emailSettings })
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                alert('Đã lưu cài đặt thông báo email thành công');
+              } else {
+                alert(data.message || 'Lỗi khi lưu cài đặt thông báo email');
+              }
+            })
+            .catch(error => {
+              console.error('Lỗi khi lưu cài đặt thông báo email:', error);
+              alert('Đã xảy ra lỗi khi lưu cài đặt. Vui lòng thử lại sau.');
+            });
+        })
+        .catch(error => {
+          console.error('Lỗi khi kiểm tra trạng thái đăng nhập:', error);
+          alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+        });
+    }
+    
+    // Thêm sự kiện cho nút lưu cài đặt email
+    if (saveEmailSettingsBtn) {
+      saveEmailSettingsBtn.addEventListener('click', saveEmailNotificationSettings);
+    }
+    
+    // Thêm sự kiện thay đổi cho các checkbox để cập nhật trạng thái enabled
+    if (emailDailyEnabledCheckbox) {
+      emailDailyEnabledCheckbox.addEventListener('change', function() {
+        if (this.checked && !isValidEmail(emailInput.value)) {
+          alert('Vui lòng nhập địa chỉ email hợp lệ để bật thông báo');
+        }
+      });
+    }
+    
+    if (emailWeeklyEnabledCheckbox) {
+      emailWeeklyEnabledCheckbox.addEventListener('change', function() {
+        if (this.checked && !isValidEmail(emailInput.value)) {
+          alert('Vui lòng nhập địa chỉ email hợp lệ để bật thông báo');
+        }
+      });
+    }
 });
+
+// Hàm kiểm tra email hợp lệ
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}

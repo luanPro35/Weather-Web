@@ -40,6 +40,45 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: true
         },
+        favoriteCities: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            get() {
+                const value = this.getDataValue('favoriteCities');
+                return value ? JSON.parse(value) : [];
+            },
+            set(value) {
+                this.setDataValue('favoriteCities', JSON.stringify(value));
+            }
+        },
+        emailNotifications: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            get() {
+                const value = this.getDataValue('emailNotifications');
+                return value ? JSON.parse(value) : {
+                    enabled: false,
+                    email: '',
+                    dailyWeather: {
+                        enabled: false,
+                        time: '07:00',
+                        frequency: 'daily'
+                    },
+                    weeklyReport: {
+                        enabled: false,
+                        day: 'monday',
+                        time: '08:00'
+                    },
+                    severeWeather: {
+                        enabled: false,
+                        conditions: ['storm', 'heavy-rain', 'extreme-heat', 'fog']
+                    }
+                };
+            },
+            set(value) {
+                this.setDataValue('emailNotifications', JSON.stringify(value));
+            }
+        },
         createdAt: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
