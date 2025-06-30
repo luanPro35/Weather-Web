@@ -14,7 +14,7 @@ const sequelize = new Sequelize(
     {
         host: config.database.host,
         dialect: 'mysql',
-        logging: config.app.environment === 'development' ? console.log : false,
+        logging: process.env.SEQUELIZE_LOGGING === 'false' ? false : (config.app.environment === 'development' ? console.log : false),
         pool: {
             max: 5,
             min: 0,
@@ -28,7 +28,9 @@ module.exports = function() {
     // Test the connection
     sequelize.authenticate()
         .then(() => {
-            console.log('Kết nối đến MySQL thành công.');
+            if (process.env.NODE_ENV !== 'production') {
+                console.log('Kết nối đến MySQL thành công.');
+            }
         })
         .catch(err => {
             console.error('Không thể kết nối đến MySQL:', err);

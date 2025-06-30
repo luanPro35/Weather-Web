@@ -66,13 +66,7 @@ module.exports = (sequelize) => {
         }
     }, {
         tableName: 'email_notifications',
-        timestamps: true,
-        indexes: [
-            {
-                unique: true,
-                fields: ['userId']
-            }
-        ]
+        timestamps: true
     });
 
     EmailNotification.associate = (models) => {

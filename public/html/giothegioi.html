@@ -3,16 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Weather App - Thời tiết thông minh</title>
     <link rel="stylesheet" href="../css/trangchu.css" />
+    <link rel="stylesheet" href="../css/giothegioi.css" />
+    <link rel="stylesheet" href="../css/weather-animations.css" />
+    <title>Ứng dụng Thời tiết - Giờ Thế Giới</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
   </head>
   <body>
-    <!-- Navigation -->
-    <nav class="navbar" id="mainNav">
+    <div class="weather-animation" id="weatherAnimation"></div>
+
+    <nav class="navbar">
       <div class="brand">
         <i class="fas fa-sun brand-icon"></i>
         <span class="brand-name">Weathery</span>
@@ -22,12 +25,12 @@
       </button>
       <ul class="nav-menu" id="navMenu">
         <li class="nav-item">
-          <a href="../html/trangchu.html" class="nav-link active">
-            <i class="fas fa-home"></i> Trang Chủ
+          <a href="../html/trangchu.html" class="nav-link">
+            <i class="fas fa-home"></i> Trang chủ
           </a>
         </li>
         <li class="nav-item">
-          <a href="../html/dubao.html" class="nav-link">
+          <a href="../html/dubao.html#forecast" class="nav-link">
             <i class="fas fa-calendar-alt"></i> Dự báo
           </a>
         </li>
@@ -42,7 +45,6 @@
           </a>
         </li>
         <li class="nav-item" id="auth-section">
-          <!-- Nút/Link Đăng nhập ban đầu -->
           <a
             href="#"
             class="nav-link"
@@ -84,19 +86,96 @@
     </nav>
 
     <div class="container">
+      <div class="page-header">
+        <h1 class="page-title">
+          <i class="fas fa-globe"></i>
+          Giờ Thế Giới
+        </h1>
+        <p class="page-subtitle">
+          Xem giờ hiện tại tại các thành phố lớn trên thế giới
+        </p>
+      </div>
+
+      <!-- Tìm kiếm thành phố -->
       <div class="search-container">
-        <div class="search-wrapper">
-          <input
-            type="text"
-            id="cityInput"
-            class="search-box"
-            placeholder="Nhập tên thành phố..."
-          />
-          <i class="fas fa-search search-icon"></i>
+        <div class="search-box">
+          <input type="text" id="citySearch" placeholder="Tìm kiếm thành phố..." />
+          <button id="searchButton">
+            <i class="fas fa-search"></i>
+          </button>
         </div>
       </div>
 
-      <div id="weatherContent"></div>
+      <!-- Múi giờ hiện tại -->
+      <div class="current-timezone-card">
+        <div class="current-time-display">
+          <div class="current-time" id="localTime">12:00:00</div>
+          <div class="current-date" id="localDate">Thứ Hai, 01 tháng 01, 2023</div>
+          <div class="current-location" id="localLocation">Vị trí hiện tại của bạn</div>
+        </div>
+      </div>
+
+      <!-- Danh sách múi giờ -->
+      <div class="world-clock-grid" id="worldClockGrid">
+        <!-- Các thẻ múi giờ sẽ được thêm vào đây bằng JavaScript -->
+      </div>
+
+      <!-- Thêm múi giờ mới -->
+      <div class="add-timezone-section">
+        <h2><i class="fas fa-plus-circle"></i> Thêm múi giờ mới</h2>
+        <div class="timezone-selector">
+          <select id="timezoneSelect">
+            <option value="" disabled selected>Chọn múi giờ...</option>
+            <!-- Các múi giờ sẽ được thêm vào đây bằng JavaScript -->
+          </select>
+          <button id="addTimezoneButton" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Thêm
+          </button>
+        </div>
+      </div>
+
+      <!-- Bản đồ múi giờ -->
+      <div class="timezone-map-section">
+        <h2><i class="fas fa-map-marked-alt"></i> Bản đồ múi giờ</h2>
+        <div class="timezone-map" id="timezoneMap">
+          <!-- Bản đồ múi giờ sẽ được thêm vào đây -->
+          <img src="../images/timezone-map.svg" alt="Bản đồ múi giờ thế giới" class="timezone-map-image" />
+        </div>
+      </div>
+
+      <!-- Chuyển đổi giờ -->
+      <div class="time-converter-section">
+        <h2><i class="fas fa-exchange-alt"></i> Chuyển đổi giờ</h2>
+        <div class="time-converter">
+          <div class="converter-row">
+            <div class="converter-column">
+              <label for="sourceTime">Thời gian nguồn:</label>
+              <input type="datetime-local" id="sourceTime" />
+            </div>
+            <div class="converter-column">
+              <label for="sourceTimezone">Múi giờ nguồn:</label>
+              <select id="sourceTimezone">
+                <!-- Các múi giờ sẽ được thêm vào đây bằng JavaScript -->
+              </select>
+            </div>
+          </div>
+          <div class="converter-row">
+            <div class="converter-column">
+              <label for="targetTime">Thời gian đích:</label>
+              <input type="datetime-local" id="targetTime" readonly />
+            </div>
+            <div class="converter-column">
+              <label for="targetTimezone">Múi giờ đích:</label>
+              <select id="targetTimezone">
+                <!-- Các múi giờ sẽ được thêm vào đây bằng JavaScript -->
+              </select>
+            </div>
+          </div>
+          <button id="convertTimeButton" class="btn btn-primary">
+            <i class="fas fa-sync"></i> Chuyển đổi
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Khung Đăng nhập (Modal) -->
@@ -155,7 +234,6 @@
           <h2>Đăng ký</h2>
           <p>Tạo tài khoản mới để trải nghiệm đầy đủ.</p>
           <form id="registerForm">
-            <!-- <input type="text" id="registerUsername" placeholder="Tên người dùng" required> -->
             <input
               type="email"
               id="registerEmail"
@@ -182,30 +260,7 @@
         </div>
       </div>
     </div>
-
-    <script src="../js/trangchu.js"></script>
-    <script>
-      // Hàm kích hoạt lại các trình lắng nghe sự kiện cho thanh điều hướng
-      function reattachNavigationListeners() {
-        const navLinks = document.querySelectorAll("#mainNav .nav-link");
-        navLinks.forEach((link) => {
-          link.addEventListener("click", function (event) {
-            // Ngăn chặn hành vi mặc định của liên kết
-            event.preventDefault();
-
-            // Lấy đường dẫn từ thuộc tính href
-            const href = this.getAttribute("href");
-
-            // Chuyển hướng đến trang mới
-            window.location.href = href;
-          });
-        });
-      }
-
-      // Gọi hàm này sau khi nội dung trang được thay thế
-      reattachNavigationListeners();
-    </script>
-
+    <script src="../js/giothegioi.js"></script>
     <!-- Script để xử lý hiển thị lời chào sau khi đăng nhập Google -->
     <script>
       window.addEventListener("DOMContentLoaded", (event) => {
@@ -220,18 +275,18 @@
             userName.replace(/\+/g, " ")
           );
           userGreeting.textContent = `Xin chào, ${decodedUserName}`;
-          userGreeting.style.display = "inline"; // Hiển thị lời chào
-          loginTriggerLink.style.display = "none"; // Ẩn nút đăng nhập
-          window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname
-          ); // Xóa tham số 'name' khỏi URL
+          userGreeting.style.display = "inline";
+          loginTriggerLink.style.display = "none";
+          // Xóa tham số 'name' khỏi URL để giao diện đẹp hơn
+          const newUrl =
+            window.location.protocol +
+            "//" +
+            window.location.host +
+            window.location.pathname +
+            window.location.hash;
+          window.history.replaceState({ path: newUrl }, "", newUrl);
         }
       });
     </script>
-
-    <!-- AI Weather Chatbot Script -->
-    <script src="../js/ai-chatbot.js"></script>
   </body>
 </html>

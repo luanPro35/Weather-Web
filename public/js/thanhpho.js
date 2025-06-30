@@ -2,6 +2,8 @@
 let favoriteCities = [];
 let isLoading = false;
 const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Your API key
+// Thiết lập API_KEY toàn cục để các file khác có thể sử dụng
+window.API_KEY = API_KEY;
 const DEFAULT_CITY_FOR_BACKGROUND = "Da Nang"; // Fallback default city for page background
 let currentSuggestionIndex = -1; // For keyboard navigation of suggestions
 let isUserLoggedIn = false; // Trạng thái đăng nhập của người dùng

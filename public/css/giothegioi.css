@@ -1,0 +1,776 @@
+/* Styles for World Clock Page */
+
+/* Main container styles */
+:root {
+  --primary-color: #3498db;
+  --primary-dark: #2980b9;
+  --primary-light: #5dade2;
+  --accent-color: #f39c12;
+  --text-dark: #333;
+  --text-light: #666;
+  --white: #fff;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 8px 25px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 15px;
+  --border-radius-xl: 30px;
+  --transition-fast: 0.2s;
+  --transition-normal: 0.3s;
+  --transition-slow: 0.5s;
+}
+
+body {
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
+  background-attachment: fixed;
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Search box styles */
+.search-container {
+  margin: 20px 0;
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.search-box {
+  display: flex;
+  max-width: 600px;
+  margin: 0 auto;
+  border-radius: var(--border-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background-color: var(--card-bg);
+  transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+  border: 1px solid rgba(52, 152, 219, 0.1);
+}
+
+.search-box:focus-within {
+  box-shadow: var(--shadow-md), 0 0 0 3px rgba(52, 152, 219, 0.2);
+  transform: translateY(-2px);
+}
+
+.search-box input {
+  flex: 1;
+  padding: 15px 20px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  background: transparent;
+  color: var(--text-dark);
+}
+
+.search-box button {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border: none;
+  color: var(--white);
+  padding: 0 25px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.search-box button:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.6s;
+}
+
+.search-box button:hover:before {
+  left: 100%;
+}
+
+.search-box button:hover {
+  background: linear-gradient(135deg, var(--primary-dark), #1a6aa8);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Current timezone card */
+.current-timezone-card {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border-radius: var(--border-radius-lg);
+  padding: 35px;
+  margin: 30px 0;
+  color: var(--white);
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.current-timezone-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.current-timezone-card:before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  opacity: 0.7;
+}
+
+.current-time-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.current-time {
+  font-size: 4.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  letter-spacing: 2px;
+  animation: pulse 1.5s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.9; }
+  to { opacity: 1; }
+}
+
+.current-date {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  opacity: 0.9;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+.current-location {
+  font-size: 1.2rem;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.current-location:before {
+  content: '📍';
+  font-size: 1.3rem;
+}
+
+/* World clock grid */
+.world-clock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  margin: 35px 0;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.clock-card {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius-md);
+  padding: 25px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  position: relative;
+  border-left: 4px solid var(--primary-color);
+  overflow: hidden;
+}
+
+.clock-card:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.clock-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-md);
+}
+
+.clock-card:hover:before {
+  opacity: 1;
+}
+
+.clock-time {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-dark);
+  letter-spacing: 1px;
+  transition: color var(--transition-normal);
+}
+
+.clock-card:hover .clock-time {
+  color: var(--primary-color);
+}
+
+.clock-date {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin-bottom: 12px;
+  font-weight: 400;
+}
+
+.clock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.clock-location {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  transition: color var(--transition-normal);
+}
+
+.clock-card:hover .clock-location {
+  color: var(--primary-dark);
+}
+
+.clock-location i {
+  margin-right: 10px;
+  color: var(--primary-color);
+  transition: transform var(--transition-fast);
+}
+
+.clock-card:hover .clock-location i {
+  transform: scale(1.2);
+}
+
+.flag-icon {
+  width: 26px;
+  height: 20px;
+  margin-right: 12px;
+  border-radius: 3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform var(--transition-fast);
+}
+
+.clock-card:hover .flag-icon {
+  transform: scale(1.1);
+}
+
+.favorite {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  cursor: pointer;
+  font-size: 1.3rem;
+  margin-right: 10px;
+  transition: all var(--transition-fast);
+  position: relative;
+  z-index: 1;
+}
+
+.favorite:hover {
+  transform: scale(1.3);
+}
+
+.favorite.active {
+  color: var(--accent-color);
+  animation: starPulse 0.5s ease-out;
+}
+
+@keyframes starPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.5); }
+  100% { transform: scale(1.2); }
+}
+
+.favorite:not(.active) {
+  color: #ccc;
+}
+
+.clock-info {
+  margin-top: 15px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 15px;
+  transition: border-color var(--transition-normal);
+}
+
+.clock-card:hover .clock-info {
+  border-top-color: rgba(52, 152, 219, 0.2);
+}
+
+.clock-timezone {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dst-badge {
+  background-color: #4caf50;
+  color: white;
+  padding: 3px 8px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+  transition: all var(--transition-normal);
+}
+
+.dst-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
+}
+
+.time-difference {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  font-style: italic;
+  transition: color var(--transition-normal);
+}
+
+.clock-card:hover .time-difference {
+  color: var(--primary-color);
+}
+
+.remove-clock {
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 1.2rem;
+  opacity: 0.7;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.remove-clock:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Add timezone section */
+.add-timezone-section {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius-md);
+  padding: 30px;
+  margin: 35px 0;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  border-top: 4px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.add-timezone-section:hover {
+  box-shadow: var(--shadow-md);
+  border-top-color: var(--primary-color);
+  transform: translateY(-5px);
+}
+
+.add-timezone-section h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: var(--text-dark);
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.add-timezone-section h2 i {
+  margin-right: 12px;
+  color: var(--primary-color);
+  transition: transform var(--transition-fast);
+}
+
+.add-timezone-section:hover h2 i {
+  transform: rotate(180deg);
+}
+
+.timezone-selector {
+  display: flex;
+  gap: 20px;
+}
+
+.timezone-selector select {
+  flex: 1;
+  padding: 14px 18px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  outline: none;
+  transition: all var(--transition-normal);
+  background-color: var(--white);
+  color: var(--text-dark);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%233498db' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.timezone-selector select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.timezone-selector select:hover {
+  border-color: var(--primary-light);
+}
+
+.btn {
+  padding: 14px 28px;
+  border-radius: var(--border-radius-sm);
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn i {
+  margin-right: 10px;
+  transition: transform var(--transition-fast);
+}
+
+.btn:hover i {
+  transform: scale(1.2);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: var(--white);
+  box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--primary-dark), #1a6aa8);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(52, 152, 219, 0.3);
+}
+
+.btn-primary:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.6s;
+}
+
+.btn-primary:hover:before {
+  left: 100%;
+}
+
+/* Timezone map section */
+.timezone-map-section {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius-md);
+  padding: 30px;
+  margin: 35px 0;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.timezone-map-section:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-5px);
+}
+
+.timezone-map-section h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: var(--text-dark);
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+}
+
+.timezone-map-section h2 i {
+  margin-right: 12px;
+  color: var(--primary-color);
+  transition: transform var(--transition-fast);
+}
+
+.timezone-map-section:hover h2 i {
+  transform: rotate(15deg);
+}
+
+.timezone-map {
+  width: 100%;
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.timezone-map:hover {
+  box-shadow: var(--shadow-md);
+  transform: scale(1.01);
+}
+
+.timezone-map-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: all var(--transition-normal);
+}
+
+/* Time converter section */
+.time-converter-section {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius-md);
+  padding: 30px;
+  margin: 35px 0;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  border-right: 4px solid transparent;
+}
+
+.time-converter-section:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-5px);
+  border-right-color: var(--primary-color);
+}
+
+.time-converter-section h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: var(--text-dark);
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+}
+
+.time-converter-section h2 i {
+  margin-right: 12px;
+  color: var(--primary-color);
+  transition: transform var(--transition-fast);
+}
+
+.time-converter-section:hover h2 i {
+  transform: rotate(360deg);
+  transition: transform 0.8s ease-in-out;
+}
+
+.time-converter {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.converter-row {
+  display: flex;
+  gap: 25px;
+}
+
+.converter-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.converter-column label {
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: var(--text-light);
+  font-weight: 500;
+  transition: color var(--transition-normal);
+}
+
+.converter-column:hover label {
+  color: var(--primary-color);
+}
+
+.converter-column input,
+.converter-column select {
+  padding: 14px 18px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  outline: none;
+  transition: all var(--transition-normal);
+  background-color: var(--white);
+  color: var(--text-dark);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.converter-column select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%233498db' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.converter-column input:focus,
+.converter-column select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.converter-column input:hover,
+.converter-column select:hover {
+  border-color: var(--primary-light);
+}
+
+#convertTimeButton {
+  align-self: flex-end;
+  margin-top: 15px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .current-time {
+    font-size: 3.5rem;
+  }
+  
+  .current-date {
+    font-size: 1.3rem;
+  }
+  
+  .converter-row {
+    flex-direction: column;
+  }
+  
+  .timezone-selector {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .world-clock-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .current-time {
+    font-size: 2.8rem;
+  }
+  
+  .current-date {
+    font-size: 1.1rem;
+  }
+  
+  .clock-time {
+    font-size: 2.2rem;
+  }
+  
+  .add-timezone-section,
+  .timezone-map-section,
+  .time-converter-section {
+    padding: 20px;
+  }
+  
+  .search-box input {
+    padding: 12px 15px;
+  }
+  
+  .search-box button {
+    padding: 0 20px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-dark: #e1e1e1;
+    --text-light: #b0b0b0;
+    --card-bg: rgba(30, 30, 30, 0.95);
+  }
+  
+  body {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+  }
+  
+  .search-box,
+  .timezone-selector select,
+  .converter-column input,
+  .converter-column select {
+    background-color: rgba(40, 40, 40, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-dark);
+  }
+  
+  .clock-card,
+  .add-timezone-section,
+  .timezone-map-section,
+  .time-converter-section {
+    background-color: rgba(30, 30, 30, 0.95);
+    border-color: rgba(52, 152, 219, 0.3);
+  }
+  
+  .clock-info {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .clock-card:hover .clock-info {
+    border-top-color: rgba(52, 152, 219, 0.3);
+  }
+}

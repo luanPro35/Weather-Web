@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600">
+  <!-- Background -->
+  <rect x="0" y="0" width="1200" height="600" fill="#e6f2ff" />
+  
+  <!-- Grid lines for time zones -->
+  <g stroke="#aaa" stroke-width="1">
+    <!-- Vertical lines for each timezone (24 zones) -->
+    <line x1="50" y1="50" x2="50" y2="550" />
+    <line x1="100" y1="50" x2="100" y2="550" />
+    <line x1="150" y1="50" x2="150" y2="550" />
+    <line x1="200" y1="50" x2="200" y2="550" />
+    <line x1="250" y1="50" x2="250" y2="550" />
+    <line x1="300" y1="50" x2="300" y2="550" />
+    <line x1="350" y1="50" x2="350" y2="550" />
+    <line x1="400" y1="50" x2="400" y2="550" />
+    <line x1="450" y1="50" x2="450" y2="550" />
+    <line x1="500" y1="50" x2="500" y2="550" />
+    <line x1="550" y1="50" x2="550" y2="550" />
+    <line x1="600" y1="50" x2="600" y2="550" stroke="#f00" stroke-width="2" />
+    <line x1="650" y1="50" x2="650" y2="550" />
+    <line x1="700" y1="50" x2="700" y2="550" />
+    <line x1="750" y1="50" x2="750" y2="550" />
+    <line x1="800" y1="50" x2="800" y2="550" />
+    <line x1="850" y1="50" x2="850" y2="550" />
+    <line x1="900" y1="50" x2="900" y2="550" />
+    <line x1="950" y1="50" x2="950" y2="550" />
+    <line x1="1000" y1="50" x2="1000" y2="550" />
+    <line x1="1050" y1="50" x2="1050" y2="550" />
+    <line x1="1100" y1="50" x2="1100" y2="550" />
+    <line x1="1150" y1="50" x2="1150" y2="550" />
+    
+    <!-- Horizontal lines for latitude -->
+    <line x1="50" y1="150" x2="1150" y2="150" />
+    <line x1="50" y1="250" x2="1150" y2="250" />
+    <line x1="50" y1="350" x2="1150" y2="350" />
+    <line x1="50" y1="450" x2="1150" y2="450" />
+  </g>
+  
+  <!-- World map simplified outline -->
+  <path d="M200,150 Q300,100 400,150 T600,200 T800,150 T1000,200 L1100,250 Q1050,300 1000,350 T800,400 T600,350 T400,400 T200,350 L100,300 Q150,250 200,150 Z" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2" />
+  
+  <!-- Simplified continent outlines -->
+  <!-- North America -->
+  <path d="M150,150 Q200,100 250,150 T350,200 L300,250 Q250,300 200,250 T150,150 Z" fill="#ffcc80" stroke="#e65100" stroke-width="1" />
+  
+  <!-- South America -->
+  <path d="M300,300 Q350,250 400,300 L380,400 Q330,450 280,400 L300,300 Z" fill="#ffcc80" stroke="#e65100" stroke-width="1" />
+  
+  <!-- Europe -->
+  <path d="M600,150 Q650,100 700,150 L680,200 Q630,250 580,200 L600,150 Z" fill="#b3e5fc" stroke="#0277bd" stroke-width="1" />
+  
+  <!-- Africa -->
+  <path d="M600,250 Q650,200 700,250 L680,350 Q630,400 580,350 L600,250 Z" fill="#ffcc80" stroke="#e65100" stroke-width="1" />
+  
+  <!-- Asia -->
+  <path d="M750,150 Q850,100 950,150 L930,300 Q830,350 730,300 L750,150 Z" fill="#ffcc80" stroke="#e65100" stroke-width="1" />
+  
+  <!-- Australia -->
+  <path d="M950,350 Q1000,300 1050,350 L1030,400 Q980,450 930,400 L950,350 Z" fill="#ffcc80" stroke="#e65100" stroke-width="1" />
+  
+  <!-- Time zone labels -->
+  <g font-family="Arial" font-size="10" text-anchor="middle">
+    <text x="50" y="40">UTC-12</text>
+    <text x="100" y="40">UTC-11</text>
+    <text x="150" y="40">UTC-10</text>
+    <text x="200" y="40">UTC-9</text>
+    <text x="250" y="40">UTC-8</text>
+    <text x="300" y="40">UTC-7</text>
+    <text x="350" y="40">UTC-6</text>
+    <text x="400" y="40">UTC-5</text>
+    <text x="450" y="40">UTC-4</text>
+    <text x="500" y="40">UTC-3</text>
+    <text x="550" y="40">UTC-2</text>
+    <text x="600" y="40">UTC-1</text>
+    <text x="650" y="40">UTC+0</text>
+    <text x="700" y="40">UTC+1</text>
+    <text x="750" y="40">UTC+2</text>
+    <text x="800" y="40">UTC+3</text>
+    <text x="850" y="40">UTC+4</text>
+    <text x="900" y="40">UTC+5</text>
+    <text x="950" y="40">UTC+6</text>
+    <text x="1000" y="40">UTC+7</text>
+    <text x="1050" y="40">UTC+8</text>
+    <text x="1100" y="40">UTC+9</text>
+    <text x="1150" y="40">UTC+10</text>
+  </g>
+  
+  <!-- Major city markers -->
+  <g>
+    <!-- Los Angeles -->
+    <circle cx="250" cy="200" r="5" fill="#f44336" />
+    <text x="250" y="185" font-family="Arial" font-size="12" text-anchor="middle">Los Angeles</text>
+    
+    <!-- New York -->
+    <circle cx="400" cy="180" r="5" fill="#f44336" />
+    <text x="400" y="165" font-family="Arial" font-size="12" text-anchor="middle">New York</text>
+    
+    <!-- London -->
+    <circle cx="650" cy="150" r="5" fill="#f44336" />
+    <text x="650" y="135" font-family="Arial" font-size="12" text-anchor="middle">London</text>
+    
+    <!-- Paris -->
+    <circle cx="670" cy="160" r="5" fill="#f44336" />
+    <text x="670" y="145" font-family="Arial" font-size="12" text-anchor="middle">Paris</text>
+    
+    <!-- Moscow -->
+    <circle cx="800" cy="140" r="5" fill="#f44336" />
+    <text x="800" y="125" font-family="Arial" font-size="12" text-anchor="middle">Moscow</text>
+    
+    <!-- Dubai -->
+    <circle cx="850" cy="220" r="5" fill="#f44336" />
+    <text x="850" y="205" font-family="Arial" font-size="12" text-anchor="middle">Dubai</text>
+    
+    <!-- Tokyo -->
+    <circle cx="1100" cy="180" r="5" fill="#f44336" />
+    <text x="1100" y="165" font-family="Arial" font-size="12" text-anchor="middle">Tokyo</text>
+    
+    <!-- Sydney -->
+    <circle cx="1050" cy="380" r="5" fill="#f44336" />
+    <text x="1050" y="365" font-family="Arial" font-size="12" text-anchor="middle">Sydney</text>
+    
+    <!-- Hanoi -->
+    <circle cx="1000" cy="230" r="5" fill="#f44336" />
+    <text x="1000" y="215" font-family="Arial" font-size="12" text-anchor="middle">Hà Nội</text>
+  </g>
+  
+  <!-- Title and legend -->
+  <text x="600" y="580" font-family="Arial" font-size="20" font-weight="bold" text-anchor="middle">Bản đồ múi giờ thế giới</text>
+  
+  <!-- Legend -->
+  <rect x="50" y="520" width="15" height="15" fill="#f44336" />
+  <text x="75" y="533" font-family="Arial" font-size="12" text-anchor="start">Thành phố lớn</text>
+  
+  <line x1="150" y1="528" x2="200" y2="528" stroke="#f00" stroke-width="2" />
+  <text x="210" y="533" font-family="Arial" font-size="12" text-anchor="start">Đường đổi ngày quốc tế</text>
+</svg>

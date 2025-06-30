@@ -1,4 +1,6 @@
 const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của bạn
+// Thiết lập API_KEY toàn cục để các file khác có thể sử dụng
+window.API_KEY = API_KEY;
 const DEFAULT_CITY = "Da Nang"; // Fallback default city
  
 // Weather icons mapping

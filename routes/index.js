@@ -42,6 +42,10 @@ router.get('/thongbao', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/thongbao.html'));
 });
 
+router.get('/giothegioi', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/giothegioi.html'));
+});
+
 router.get('/thanhpho', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/thanhpho.html'));
 });
