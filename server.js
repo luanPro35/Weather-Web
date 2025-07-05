@@ -33,7 +33,30 @@ const scheduleEmailNotifications = async () => {
 
 // Initialize Express app
 const app = express();
-const port = config.app.port || 3000;
+
+// Lấy cổng từ biến môi trường hoặc cấu hình
+const port = process.env.PORT || config.app.port || 3000;
+console.log(`Cấu hình cổng: ${port}`);
+
+// Xử lý tắt server đúng cách khi nhận tín hiệu
+process.on('SIGTERM', () => {
+  console.log('Nhận tín hiệu SIGTERM, đang đóng server...');
+  server && server.close(() => {
+    console.log('Server đã đóng.');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('Nhận tín hiệu SIGINT, đang đóng server...');
+  server && server.close(() => {
+    console.log('Server đã đóng.');
+    process.exit(0);
+  });
+});
+
+// Biến toàn cục để lưu trữ instance của server
+let server;
 
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -56,6 +79,7 @@ require('./config/passport')();
 // Routes - Chỉ sử dụng các route cần thiết
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
+app.use('/api/chatbot', require('./routes/chatbot'));
 
 // Thêm route mặc định để chuyển hướng đến trangchu.html
 app.get('/', (req, res) => {
@@ -92,34 +116,46 @@ initializeDatabase()
         console.error('Lỗi khi khởi tạo ứng dụng:', err);
     });
 
-// Thử lắng nghe trên cổng được cấu hình, nếu bị lỗi thì thử cổng khác
-const startServer = () => {
-    let portToUse = port;
+/**
+ * Khởi động server trên cổng được chỉ định, nếu cổng đã được sử dụng thì thử cổng khác
+ * @param {number} portToUse - Cổng để khởi động server
+ * @param {number} maxAttempts - Số lần thử tối đa
+ * @param {number} attempt - Số lần đã thử
+ */
+const startServer = (portToUse = port, maxAttempts = 10, attempt = 1) => {
     // Kiểm tra giới hạn cổng hợp lệ
     if (portToUse >= 65536) {
         console.error('Không thể tìm thấy cổng khả dụng trong phạm vi hợp lệ (0-65535).');
+        process.exit(1);
         return;
     }
     
-    // Nếu cổng là 3000 và bị sử dụng, thử cổng 8080 thay vì tăng dần
+    // Kiểm tra số lần thử
+    if (attempt > maxAttempts) {
+        console.error(`Đã thử ${maxAttempts} cổng khác nhau nhưng không thành công. Vui lòng kiểm tra lại cấu hình mạng.`);
+        process.exit(1);
+        return;
+    }
+    
+    // Xác định cổng tiếp theo nếu cổng hiện tại bị sử dụng
+    let nextPort;
     if (portToUse === 3000) {
-        const nextPort = 8080;
-        const server = app.listen(portToUse, () => {
-            const url = `http://localhost:${portToUse}`;
-            // Chỉ hiển thị thông báo server đang chạy
-            console.log('\x1b[36m%s\x1b[0m', `Server đang chạy tại: ${url}`);
-        }).on('error', (err) => {
-            if (err.code === 'EADDRINUSE') {
-                console.log(`Cổng ${portToUse} đã được sử dụng, đang thử cổng ${nextPort}...`);
-                startServer(nextPort);
-            } else {
-                console.error('Lỗi khi khởi động server:', err);
-            }
-        });
+        // Nếu cổng là 3000 và bị sử dụng, thử cổng 8080 thay vì tăng dần
+        nextPort = 8080;
+    } else if (portToUse === 8080) {
+        // Nếu cổng là 8080 và bị sử dụng, thử cổng 3001
+        nextPort = 3001;
+    } else if (portToUse >= 30000) {
+        // Nếu cổng lớn hơn hoặc bằng 30000, thử cổng 3001
+        nextPort = 3001;
     } else {
-        // Nếu không phải cổng 3000, thử tăng thêm 1 nhưng không vượt quá 9999
-        const nextPort = portToUse < 9999 ? portToUse + 1 : 3000;
-        const server = app.listen(portToUse, () => {
+        // Nếu không phải các trường hợp trên, thử tăng thêm 1
+        nextPort = portToUse + 1;
+    }
+    
+    // Thử khởi động server trên cổng hiện tại
+    try {
+        server = app.listen(portToUse, () => {
             const url = `http://localhost:${portToUse}`;
             console.log('\x1b[36m%s\x1b[0m', `Server đang chạy tại: ${url}`);
             console.log('\x1b[32m%s\x1b[0m', `Bạn có thể truy cập ứng dụng tại: ${url}`);
@@ -128,13 +164,23 @@ const startServer = () => {
             console.log('\x1b[35m%s\x1b[0m', `Trong CMD: Nhấp chuột phải vào URL và chọn "Open Hyperlink"`);
         }).on('error', (err) => {
             if (err.code === 'EADDRINUSE') {
-                console.log(`Cổng ${portToUse} đã được sử dụng, đang thử cổng ${nextPort}...`);
-                startServer(nextPort);
+                console.log(`Cổng ${portToUse} đã được sử dụng, đang thử cổng ${nextPort}... (Lần thử ${attempt}/${maxAttempts})`);
+                startServer(nextPort, maxAttempts, attempt + 1);
             } else {
                 console.error('Lỗi khi khởi động server:', err);
+                process.exit(1);
             }
         });
+        
+        // Xử lý lỗi không bắt được
+        server.on('error', (err) => {
+            console.error('Lỗi server không mong đợi:', err);
+        });
+    } catch (err) {
+        console.error('Lỗi không mong đợi khi khởi động server:', err);
+        process.exit(1);
     }
 };
 
-startServer(port);
+// Chỉ gọi startServer một lần, không cần truyền tham số vì đã có giá trị mặc định
+startServer();
