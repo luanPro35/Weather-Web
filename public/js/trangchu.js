@@ -425,30 +425,37 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
       // Event listeners
       document.addEventListener("DOMContentLoaded", () => {
   // Kiểm tra trạng thái đăng nhập
-  fetch('/api/user')
-    .then(response => response.json())
-    .then(data => {
-      if (data.isAuthenticated) {
-        // Hiển thị thông tin người dùng đã đăng nhập
-        const userGreeting = document.getElementById('user-greeting');
-        const authSection = document.getElementById('auth-section');
-        const loginTriggerLink = document.getElementById('loginTriggerLink');
-        
-        if (userGreeting && authSection && loginTriggerLink) {
-          userGreeting.textContent = `Xin chào, ${data.user.displayName}`;
-          userGreeting.style.display = 'inline-block';
-          loginTriggerLink.style.display = 'none';
+  // Kiểm tra xem có đang chạy từ file:// protocol không
+  if (window.location.protocol === 'file:') {
+    console.log('Đang chạy từ file system, bỏ qua kiểm tra đăng nhập');
+    // Khi chạy từ file system, không thể gọi API, nên bỏ qua
+  } else {
+    // Chỉ thực hiện fetch khi không phải protocol file://
+    fetch('/api/user')
+      .then(response => response.json())
+      .then(data => {
+        if (data.isAuthenticated) {
+          // Hiển thị thông tin người dùng đã đăng nhập
+          const userGreeting = document.getElementById('user-greeting');
+          const authSection = document.getElementById('auth-section');
+          const loginTriggerLink = document.getElementById('loginTriggerLink');
           
-          // Thêm nút đăng xuất
-          const logoutButton = document.createElement('a');
-          logoutButton.href = '/auth/logout';
-          logoutButton.className = 'nav-link';
-          logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
-          authSection.appendChild(logoutButton);
+          if (userGreeting && authSection && loginTriggerLink) {
+            userGreeting.textContent = `Xin chào, ${data.user.displayName}`;
+            userGreeting.style.display = 'inline-block';
+            loginTriggerLink.style.display = 'none';
+            
+            // Thêm nút đăng xuất
+            const logoutButton = document.createElement('a');
+            logoutButton.href = '/auth/logout';
+            logoutButton.className = 'nav-link';
+            logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Đăng xuất';
+            authSection.appendChild(logoutButton);
+          }
         }
-      }
-    })
-    .catch(error => console.error('Lỗi khi kiểm tra trạng thái đăng nhập:', error));
+      })
+      .catch(error => console.error('Lỗi khi kiểm tra trạng thái đăng nhập:', error));
+  }
 
         loadWeatherBasedOnLocation(DEFAULT_CITY, API_KEY, getWeather);
  

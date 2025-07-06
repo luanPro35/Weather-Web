@@ -124,6 +124,8 @@
           </div>
         </div>
       </section>
+
+      <!-- Chatbot đã được loại bỏ theo yêu cầu -->
     </div>
     <!-- Khung Đăng nhập (Modal) -->
     <div id="loginModal" class="modal-overlay">
@@ -209,32 +211,8 @@
       </div>
     </div>
     <script src="../js/dubao.js"></script>
+    <!-- Script liên quan đến chatbot đã được loại bỏ -->
     <!-- Script để xử lý hiển thị lời chào sau khi đăng nhập Google -->
-    <script>
-      window.addEventListener("DOMContentLoaded", (event) => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const userName = urlParams.get("name");
-
-        const loginTriggerLink = document.getElementById("loginTriggerLink");
-        const userGreeting = document.getElementById("user-greeting");
-
-        if (userName && loginTriggerLink && userGreeting) {
-          const decodedUserName = decodeURIComponent(
-            userName.replace(/\+/g, " ")
-          );
-          userGreeting.textContent = `Xin chào, ${decodedUserName}`;
-          userGreeting.style.display = "inline";
-          loginTriggerLink.style.display = "none";
-          // Xóa tham số 'name' khỏi URL để giao diện đẹp hơn
-          const newUrl =
-            window.location.protocol +
-            "//" +
-            window.location.host +
-            window.location.pathname +
-            window.location.hash;
-          window.history.replaceState({ path: newUrl }, "", newUrl);
-        }
-      });
-    </script>
+    <script src="../js/auth-greeting.js"></script>
   </body>
 </html>

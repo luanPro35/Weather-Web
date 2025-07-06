@@ -5,10 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Weather App - Thời tiết thông minh</title>
     <link rel="stylesheet" href="../css/trangchu.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+    <link rel="stylesheet" href="../css/chatbot.css" />
+  
+  <!-- CSS cho cửa sổ chat -->
+  <link rel="stylesheet" href="../css/chatbot.css" />
+    <!-- Đảm bảo Font Awesome được tải đúng cách -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- CSS cho chatbot đã được tải trong phần head -->
+    
+    <!-- Script cho chatbot -->
+    <script src="../js/chat.js" defer></script>
   </head>
   <body>
     <!-- Navigation -->
@@ -183,7 +190,56 @@
       </div>
     </div>
 
+    <!-- Thêm nút chat trực tiếp vào HTML với thuộc tính onclick -->
+    <div id="static-chatbot-button" class="chatbot-container" style="display: block !important; position: fixed; bottom: 20px; right: 20px; z-index: 9999; pointer-events: auto;">
+      <button 
+        id="chat-toggle-button" 
+        class="chatbot-toggle" 
+        style="display: block !important; background-color: #667eea; width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2); border: none; cursor: pointer; pointer-events: auto; visibility: visible !important; opacity: 1 !important; z-index: 9999 !important;"
+      >
+        <i class="fas fa-comment" style="color: white; font-size: 24px;"></i>
+      </button>
+      
+      <!-- Các nút kiểm tra đã được xóa theo yêu cầu -->
+      
+      <!-- Chức năng chat được xử lý bởi file chat.js -->
+      
+      <!-- Cửa sổ chat được tạo trực tiếp trong HTML -->
+      <div class="chatbot-window" style="position: absolute; bottom: 70px; right: 0; width: 350px; height: 450px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s ease; opacity: 0; pointer-events: none; transform: translateY(20px);">
+        <div class="chatbot-header" style="padding: 15px 20px; background: rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between;">
+          <div class="chatbot-title" style="color: white; font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-robot"></i> Weather Assistant
+          </div>
+          <button class="chatbot-close" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="chatbot-messages" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
+          <div class="message bot-message" style="max-width: 80%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.4; word-wrap: break-word; cursor: pointer; transition: transform 0.2s, opacity 0.2s; align-self: flex-start; background: rgba(255, 255, 255, 0.1); color: white; border-bottom-left-radius: 5px;">
+            Xin chào! Tôi có thể giúp gì cho bạn về thời tiết?
+          </div>
+        </div>
+        <div class="chatbot-input" style="padding: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 10px;">
+          <input type="text" placeholder="Nhập tin nhắn của bạn..." style="flex: 1; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 12px 15px; color: white; font-size: 14px; outline: none; transition: all 0.3s;" />
+          <button class="chatbot-send" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; color: white; cursor: pointer; transition: all 0.3s;"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Các nút kiểm tra đã được xóa theo yêu cầu -->
+  </script>
+    
+    <!-- Tất cả chức năng chat được xử lý bởi file chat.js -->
+
     <script src="../js/trangchu.js"></script>
+    <script>
+      // Đảm bảo API_KEY đã được tải
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('API_KEY available:', window.API_KEY ? 'Yes' : 'No');
+      });
+    </script>
+    <!-- Tải chatbot.js sau khi trang đã tải xong -->
+    <script src="../js/chatbot.js" defer></script>
+    
+    <!-- Chức năng chat được xử lý bởi file chat.js -->
     <script>
       // Hàm kích hoạt lại các trình lắng nghe sự kiện cho thanh điều hướng
       function reattachNavigationListeners() {
@@ -207,31 +263,6 @@
     </script>
 
     <!-- Script để xử lý hiển thị lời chào sau khi đăng nhập Google -->
-    <script>
-      window.addEventListener("DOMContentLoaded", (event) => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const userName = urlParams.get("name");
-
-        const loginTriggerLink = document.getElementById("loginTriggerLink");
-        const userGreeting = document.getElementById("user-greeting");
-
-        if (userName && loginTriggerLink && userGreeting) {
-          const decodedUserName = decodeURIComponent(
-            userName.replace(/\+/g, " ")
-          );
-          userGreeting.textContent = `Xin chào, ${decodedUserName}`;
-          userGreeting.style.display = "inline"; // Hiển thị lời chào
-          loginTriggerLink.style.display = "none"; // Ẩn nút đăng nhập
-          window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname
-          ); // Xóa tham số 'name' khỏi URL
-        }
-      });
-    </script>
-
-    <!-- AI Weather Chatbot Script -->
-    <script src="../js/ai-chatbot.js"></script>
+    <script src="../js/auth-greeting.js"></script>
   </body>
 </html>

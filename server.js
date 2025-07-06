@@ -79,7 +79,6 @@ require('./config/passport')();
 // Routes - Chỉ sử dụng các route cần thiết
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
-app.use('/api/chatbot', require('./routes/chatbot'));
 
 // Thêm route mặc định để chuyển hướng đến trangchu.html
 app.get('/', (req, res) => {
