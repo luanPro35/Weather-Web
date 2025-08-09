@@ -183,3 +183,24 @@ const startServer = (portToUse = port, maxAttempts = 10, attempt = 1) => {
 
 // Chỉ gọi startServer một lần, không cần truyền tham số vì đã có giá trị mặc định
 startServer();
+
+// Định nghĩa lại route /auth/google/callback để xử lý đăng nhập bằng Google
+app.get('/auth/google/callback', 
+  passport.authenticate('google', { 
+    failureRedirect: '/login',
+    failureFlash: true
+  }),
+  (req, res) => {
+    // Log successful authentication
+    console.log('User authenticated:', req.user);
+    
+    // Store user info in session
+    req.session.user = {
+      name: req.user.displayName,
+      email: req.user.emails[0].value,
+      picture: req.user.photos[0].value
+    };
+    
+    res.redirect('/?login=success');
+  }
+);
