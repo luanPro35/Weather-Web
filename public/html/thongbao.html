@@ -547,7 +547,17 @@
       </div>
     </div>
     <script src="../js/thongbao.js"></script>
-    <!-- Script liên quan đến chatbot đã được loại bỏ -->
+    <!-- Thêm chatbot thời tiết -->
+    <link rel="stylesheet" href="../css/chatbot.css" />
+    <script src="../js/chatbot.js"></script>
+    <script>
+      // Khởi tạo chatbot sau khi trang đã tải xong
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.weatherChatbot && typeof window.weatherChatbot.init === 'function') {
+          window.weatherChatbot.init();
+        }
+      });
+    </script>
     <!-- Script để xử lý hiển thị lời chào sau khi đăng nhập Google -->
     <script src="../js/auth-greeting.js"></script>
   </body>

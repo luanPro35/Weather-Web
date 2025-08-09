@@ -280,76 +280,42 @@ async function getForecast(city) {
 }
 
 // Bộ chuyển đổi tên Tỉnh sang Thành phố để API dễ nhận dạng hơn
-// Bao gồm tất cả 63 tỉnh thành và các tên gọi phổ biến.
 const provinceToCityMap = {
     // Miền Bắc
-    'hà giang': 'Hà Giang', 'ha giang': 'Hà Giang',
-    'cao bằng': 'Cao Bằng', 'cao bang': 'Cao Bằng',
-    'bắc kạn': 'Bắc Kạn', 'bac kan': 'Bắc Kạn',
-    'lạng sơn': 'Lạng Sơn', 'lang son': 'Lạng Sơn',
-    'tuyên quang': 'Tuyên Quang', 'tuyen quang': 'Tuyên Quang',
-    'thái nguyên': 'Thái Nguyên', 'thai nguyen': 'Thái Nguyên',
-    'phú thọ': 'Việt Trì', 'phu tho': 'Việt Trì',
-    'bắc giang': 'Bắc Giang', 'bac giang': 'Bắc Giang',
-    'quảng ninh': 'Hạ Long', 'quang ninh': 'Hạ Long',
-    'lào cai': 'Lào Cai', 'lao cai': 'Lào Cai',
-    'yên bái': 'Yên Bái', 'yen bai': 'Yên Bái',
-    'điện biên': 'Điện Biên Phủ', 'dien bien': 'Điện Biên Phủ',
-    'hòa bình': 'Hòa Bình', 'hoa binh': 'Hòa Bình',
-    'lai châu': 'Lai Châu', 'lai chau': 'Lai Châu',
-    'sơn la': 'Sơn La', 'son la': 'Sơn La',
-    'bắc ninh': 'Bắc Ninh', 'bac ninh': 'Bắc Ninh',
-    'hà nam': 'Phủ Lý', 'ha nam': 'Phủ Lý',
-    'hải dương': 'Hải Dương', 'hai duong': 'Hải Dương',
-    'hưng yên': 'Hưng Yên', 'hung yen': 'Hưng Yên',
-    'nam định': 'Nam Định', 'nam dinh': 'Nam Định',
-    'ninh bình': 'Ninh Bình', 'ninh binh': 'Ninh Bình',
-    'thái bình': 'Thái Bình', 'thai binh': 'Thái Bình',
-    'vĩnh phúc': 'Vĩnh Yên', 'vinh phuc': 'Vĩnh Yên',
     'hà nội': 'Hà Nội', 'ha noi': 'Hà Nội',
-    'hải phòng': 'Hải Phòng', 'hai phong': 'Hải Phòng',
-
-    // Miền Trung
+    'huế': 'Huế', 'hue': 'Huế',
+    'lai châu': 'Lai Châu', 'lai chau': 'Lai Châu',
+    'điện biên': 'Điện Biên Phủ', 'dien bien': 'Điện Biên Phủ',
+    'sơn la': 'Sơn La', 'son la': 'Sơn La',
+    'lạng sơn': 'Lạng Sơn', 'lang son': 'Lạng Sơn',
+    'quảng ninh': 'Hạ Long', 'quang ninh': 'Hạ Long',
     'thanh hóa': 'Thanh Hóa', 'thanh hoa': 'Thanh Hóa',
     'nghệ an': 'Vinh', 'nghe an': 'Vinh',
     'hà tĩnh': 'Hà Tĩnh', 'ha tinh': 'Hà Tĩnh',
-    'quảng bình': 'Đồng Hới', 'quang binh': 'Đồng Hới',
-    'quảng trị': 'Đông Hà', 'quang tri': 'Đông Hà',
-    'thừa thiên huế': 'Huế', 'thua thien hue': 'Huế',
-    'đà nẵng': 'Đà Nẵng', 'da nang': 'Đà Nẵng',
-    'quảng nam': 'Tam Kỳ', 'quang nam': 'Tam Kỳ',
+    'cao bằng': 'Cao Bằng', 'cao bang': 'Cao Bằng',
+    'tuyên quang': 'Tuyên Quang', 'tuyen quang': 'Tuyên Quang', // Merged with Hà Giang
+    'lào cai': 'Lào Cai', 'lao cai': 'Lào Cai', // Merged with Yên Bái
+    'thái nguyên': 'Thái Nguyên', 'thai nguyen': 'Thái Nguyên', // Merged with Bắc Kạn
+    'phú thọ': 'Việt Trì', 'phu tho': 'Việt Trì', // Merged with Vĩnh Phúc and Hòa Bình
+    'bắc ninh': 'Bắc Ninh', 'bac ninh': 'Bắc Ninh', // Merged with Bắc Giang
+    'hưng yên': 'Hưng Yên', 'hung yen': 'Hưng Yên', // Merged with Thái Bình
+    'hải phòng': 'Hải Phòng', 'hai phong': 'Hải Phòng', // Merged with Hải Dương
+    'ninh bình': 'Ninh Bình', 'ninh binh': 'Ninh Bình', // Merged with Hà Nam and Nam Định
+    'quảng trị': 'Đông Hà', 'quang tri': 'Đông Hà', // Merged with Quảng Bình
+    'đà nẵng': 'Đà Nẵng', 'da nang': 'Đà Nẵng', // Merged with Quảng Nam
     'quảng ngãi': 'Quảng Ngãi', 'quang ngai': 'Quảng Ngãi',
-    'bình định': 'Quy Nhơn', 'binh dinh': 'Quy Nhơn',
-    'phú yên': 'Tuy Hòa', 'phu yen': 'Tuy Hòa',
-    'khánh hòa': 'Nha Trang', 'khanh hoa': 'Nha Trang',
-    'ninh thuận': 'Phan Rang-Tháp Chàm', 'ninh thuan': 'Phan Rang-Tháp Chàm', 'phan rang': 'Phan Rang-Tháp Chàm',
-    'bình thuận': 'Phan Thiết', 'binh thuan': 'Phan Thiết',
-    'kon tum': 'Kon Tum',
     'gia lai': 'Pleiku',
-    'đắk lắk': 'Buôn Ma Thuột', 'dak lak': 'Buôn Ma Thuột', 'bmt': 'Buôn Ma Thuột',
-    'đắk nông': 'Gia Nghĩa', 'dak nong': 'Gia Nghĩa',
+    'khánh hòa': 'Nha Trang', 'khanh hoa': 'Nha Trang',
     'lâm đồng': 'Đà Lạt', 'lam dong': 'Đà Lạt',
-
-    // Miền Nam
-    'bình phước': 'Đồng Xoài', 'binh phuoc': 'Đồng Xoài',
-    'bình dương': 'Thủ Dầu Một', 'binh duong': 'Thủ Dầu Một',
+    'đắk lắk': 'Buôn Ma Thuột', 'dak lak': 'Buôn Ma Thuột',
+    'tp. hồ chí minh': 'Ho Chi Minh City', 'ho chi minh': 'Ho Chi Minh City', 'hcm': 'Ho Chi Minh City',
     'đồng nai': 'Biên Hòa', 'dong nai': 'Biên Hòa',
     'tây ninh': 'Tây Ninh', 'tay ninh': 'Tây Ninh',
-    'bà rịa vũng tàu': 'Vũng Tàu', 'ba ria vung tau': 'Vũng Tàu', 'brvt': 'Vũng Tàu',
-    'hồ chí minh': 'Ho Chi Minh City', 'ho chi minh city': 'Ho Chi Minh City', 'hcm': 'Ho Chi Minh City', 'tp hcm': 'Ho Chi Minh City', 'sài gòn': 'Ho Chi Minh City', 'sai gon': 'Ho Chi Minh City',
-    'long an': 'Tân An',
-    'đồng tháp': 'Cao Lãnh', 'dong thap': 'Cao Lãnh',
-    'tiền giang': 'Mỹ Tho', 'tien giang': 'Mỹ Tho',
-    'an giang': 'Long Xuyên',
-    'bến tre': 'Bến Tre', 'ben tre': 'Bến Tre',
+    'cần thơ': 'Cần Thơ', 'can tho': 'Cần Thơ',
     'vĩnh long': 'Vĩnh Long', 'vinh long': 'Vĩnh Long',
-    'trà vinh': 'Trà Vinh', 'tra vinh': 'Trà Vinh',
-    'hậu giang': 'Vị Thanh', 'hau giang': 'Vị Thanh',
-    'kiên giang': 'Rạch Giá', 'kien giang': 'Rạch Giá',
-    'sóc trăng': 'Sóc Trăng', 'soc trang': 'Sóc Trăng',
-    'bạc liêu': 'Bạc Liêu', 'bac lieu': 'Bạc Liêu',
+    'đồng tháp': 'Cao Lãnh', 'dong thap': 'Cao Lãnh',
     'cà mau': 'Cà Mau', 'ca mau': 'Cà Mau',
-    'cần thơ': 'Cần Thơ', 'can tho': 'Cần Thơ'
+    'an giang': 'Long Xuyên', 'an giang': 'Long Xuyên'
 };
 
 // Fetch current weather data
@@ -368,6 +334,12 @@ async function loadPageData(city) {
     if (weatherResponse.ok) {
       const weatherData = await weatherResponse.json();
       setDynamicBackground(weatherData);
+      
+      // Cập nhật dữ liệu thời tiết cho chatbot nếu đã được khởi tạo
+      if (window.weatherChatbot && typeof window.weatherChatbot.updateWeatherData === 'function') {
+        window.weatherChatbot.updateWeatherData(weatherData);
+        console.log('Dữ liệu thời tiết đã được cập nhật cho chatbot từ dubao.js');
+      }
     } else {
       console.error("Không thể tải dữ liệu thời tiết cho nền.");
       setDynamicBackground(null); // Sử dụng nền mặc định

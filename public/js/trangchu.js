@@ -367,6 +367,11 @@ const API_KEY = "037b6dda3ea6bd588dd48b35ae88f478"; // Thay bằng API key của
 
           const data = await response.json();
           updateWeatherUI(data);
+          
+          // Cập nhật dữ liệu thời tiết cho chatbot nếu đã được khởi tạo
+          if (window.weatherChatbot && typeof window.weatherChatbot.updateWeatherData === 'function') {
+            window.weatherChatbot.updateWeatherData(data);
+          }
         } catch (error) {
           weatherContent.innerHTML = `
             <div class="error">

@@ -45,11 +45,7 @@
           </a>
         </li>
         <li class="nav-item" id="auth-section">
-          <a
-            href="#"
-            class="nav-link"
-            id="loginTriggerLink"
-          >
+          <a href="#" class="nav-link" id="loginTriggerLink">
             <i class="fas fa-sign-in-alt"></i> Đăng nhập
           </a>
           <!-- Chỗ hiển thị lời chào sau khi đăng nhập -->
@@ -99,7 +95,11 @@
       <!-- Tìm kiếm thành phố -->
       <div class="search-container">
         <div class="search-box">
-          <input type="text" id="citySearch" placeholder="Tìm kiếm thành phố..." />
+          <input
+            type="text"
+            id="citySearch"
+            placeholder="Tìm kiếm thành phố..."
+          />
           <button id="searchButton">
             <i class="fas fa-search"></i>
           </button>
@@ -110,8 +110,12 @@
       <div class="current-timezone-card">
         <div class="current-time-display">
           <div class="current-time" id="localTime">12:00:00</div>
-          <div class="current-date" id="localDate">Thứ Hai, 01 tháng 01, 2023</div>
-          <div class="current-location" id="localLocation">Vị trí hiện tại của bạn</div>
+          <div class="current-date" id="localDate">
+            Thứ Hai, 01 tháng 01, 2023
+          </div>
+          <div class="current-location" id="localLocation">
+            Vị trí hiện tại của bạn
+          </div>
         </div>
       </div>
 
@@ -139,7 +143,11 @@
         <h2><i class="fas fa-map-marked-alt"></i> Bản đồ múi giờ</h2>
         <div class="timezone-map" id="timezoneMap">
           <!-- Bản đồ múi giờ sẽ được thêm vào đây -->
-          <img src="../images/timezone-map.svg" alt="Bản đồ múi giờ thế giới" class="timezone-map-image" />
+          <img
+            src="../images/timezone-map.svg"
+            alt="Bản đồ múi giờ thế giới"
+            class="timezone-map-image"
+          />
         </div>
       </div>
 
@@ -263,7 +271,17 @@
       </div>
     </div>
     <script src="../js/giothegioi.js"></script>
-    <!-- Script liên quan đến chatbot đã được loại bỏ -->
+    <!-- Thêm chatbot thời tiết -->
+    <link rel="stylesheet" href="../css/chatbot.css" />
+    <script src="../js/chatbot.js"></script>
+    <script>
+      // Khởi tạo chatbot sau khi trang đã tải xong
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.weatherChatbot && typeof window.weatherChatbot.init === 'function') {
+          window.weatherChatbot.init();
+        }
+      });
+    </script>
     <!-- Script để xử lý hiển thị lời chào sau khi đăng nhập Google -->
     <script src="../js/auth-greeting.js"></script>
   </body>

@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
+
     // API key cho OpenWeatherMap
     const API_KEY = '9ef0cd15c8c6a0f6c3c4f05c2ee4a12f';
     
@@ -851,3 +852,35 @@ function toggleMobileMenu() {
         navMenu.classList.add('active');
     }
 }
+
+// Add CSS styles
+const styles = `
+    .welcome-message {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 15px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    .welcome-message img {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .welcome-message span {
+        color: white;
+        font-size: 14px;
+        font-weight: 500;
+    }
+`;
+
+// Add styles to document
+const styleSheet = document.createElement("style");
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);

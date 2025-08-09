@@ -85,4 +85,26 @@ router.get('/logout', (req, res) => {
     });
 });
 
+// Check authentication status route
+router.get('/status', (req, res) => {
+    console.log('Auth status requested:', req.isAuthenticated()); // For debugging
+    console.log('User:', req.user); // For debugging
+    
+    if (req.isAuthenticated() && req.user) {
+        res.json({
+            authenticated: true,
+            user: {
+                displayName: req.user.displayName,
+                email: req.user.email,
+                image: req.user.image || '/images/default-avatar.png'
+            }
+        });
+    } else {
+        res.json({
+            authenticated: false,
+            user: null
+        });
+    }
+});
+
 module.exports = router;

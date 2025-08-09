@@ -743,6 +743,12 @@ async function getWeatherData(cityName) {
             }
         }
         const data = await response.json();
+        
+        // Cập nhật dữ liệu thời tiết cho chatbot nếu đã được khởi tạo
+        if (window.weatherChatbot && typeof window.weatherChatbot.updateWeatherData === 'function') {
+            window.weatherChatbot.updateWeatherData(data);
+        }
+        
         return {
             name: data.name, // Quan trọng: sử dụng tên thành phố từ phản hồi API
             temp: Math.round(data.main.temp),

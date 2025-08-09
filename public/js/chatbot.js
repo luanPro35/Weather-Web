@@ -1,976 +1,623 @@
-// Chatbot AI for Weather App
+// Chatbot thời tiết - Xử lý tương tác và hiển thị thông tin thời tiết
 
-// Khởi tạo biến toàn cục
-let API_KEY;
+// Biến toàn cục để lưu trữ dữ liệu thời tiết hiện tại
+let currentWeatherData = null;
 
-// Hàm để lấy API key từ trangchu.js
-function getApiKey() {
-    if (window.API_KEY) {
-        API_KEY = window.API_KEY;
-        console.log('API key loaded successfully');
-    } else {
-        console.error('API key not found in window object');
-    }
-}
-
-// Thiết lập các sự kiện cho chatbot
-function setupChatbotEvents() {
-    console.log('Setting up chatbot events');
-    
-    // Lấy các phần tử cần thiết
-    const chatbotToggle = document.querySelector('.chatbot-toggle');
-    const chatbotClose = document.querySelector('.chatbot-close');
-    const chatbotWindow = document.querySelector('.chatbot-window');
-    const chatbotInput = document.querySelector('.chatbot-input input');
-    const chatbotSend = document.querySelector('.chatbot-send');
-    
-    if (!chatbotToggle || !chatbotClose || !chatbotWindow || !chatbotInput || !chatbotSend) {
-        console.error('Some chatbot elements not found');
-        // Thử tìm các phần tử trong static-chatbot-button
-        const staticChatbot = document.getElementById('static-chatbot-button');
-        if (staticChatbot) {
-            const staticToggle = staticChatbot.querySelector('.chatbot-toggle');
-            const staticWindow = staticChatbot.querySelector('.chatbot-window');
-            const staticClose = staticChatbot.querySelector('.chatbot-close');
-            const staticInput = staticChatbot.querySelector('.chatbot-input input');
-            const staticSend = staticChatbot.querySelector('.chatbot-send');
-            
-            if (staticToggle && staticWindow) {
-                console.log('Found chatbot elements in static-chatbot-button');
-                // Thiết lập sự kiện cho nút chat tĩnh
-                staticToggle.addEventListener('click', function() {
-                    console.log('Static toggle button clicked');
-                    staticWindow.classList.toggle('active');
-                });
-                
-                if (staticClose) {
-                    staticClose.addEventListener('click', function() {
-                        staticWindow.classList.remove('active');
-                    });
-                }
-                
-                if (staticInput && staticSend) {
-                    staticInput.addEventListener('input', function() {
-                        staticSend.disabled = !this.value.trim();
-                    });
-                    
-                    staticSend.addEventListener('click', function() {
-                        if (staticInput.value.trim()) {
-                            sendMessage();
-                        }
-                    });
-                    
-                    staticInput.addEventListener('keypress', function(e) {
-                        if (e.key === 'Enter' && this.value.trim()) {
-                            sendMessage();
-                        }
-                    });
-                }
-            }
-        }
-        return;
-    }
-    
-    // Sự kiện khi click vào nút chat
-chatbotToggle.addEventListener('click', function() {
-    console.log('Toggle button clicked');
-    chatbotWindow.classList.toggle('active');
-});
-
-// Thêm sự kiện click cho tin nhắn
-const messages = document.querySelectorAll('.message');
-messages.forEach(message => {
-    message.addEventListener('click', function() {
-        console.log('Message clicked');
-        chatbotWindow.classList.add('active');
-    });
-});
-    
-    // Sự kiện khi click vào nút đóng
-    chatbotClose.addEventListener('click', function() {
-        chatbotWindow.classList.remove('active');
-    });
-    
-    // Sự kiện khi nhập tin nhắn
-    chatbotInput.addEventListener('input', function() {
-        chatbotSend.disabled = !this.value.trim();
-    });
-    
-    // Sự kiện khi nhấn Enter trong ô input
-    chatbotInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && this.value.trim()) {
-            sendMessage();
-        }
-    });
-    
-    // Sự kiện khi click vào nút gửi
-    chatbotSend.addEventListener('click', function() {
-        if (chatbotInput.value.trim()) {
-            sendMessage();
-        }
-    });
-    
-    console.log('Chatbot events setup completed');
-}
-
-// Sự kiện khi trang đã tải xong
-window.addEventListener('load', function() {
-    console.log('Chatbot.js - window.load event fired');
-    
-    // Lấy API key
-    getApiKey();
-    
-    // Khởi tạo chatbot sau một khoảng thời gian ngắn
-    setTimeout(() => {
-        // Kiểm tra xem nút chat đã có sự kiện click chưa
-        const chatButton = document.getElementById('chat-toggle-button');
-        if (chatButton) {
-            console.log('Chatbot.js - Nút chat đã được tìm thấy, không gắn sự kiện click mới');
-            // Không gắn sự kiện click mới nếu nút đã có ID chat-toggle-button
-            // Chỉ khởi tạo cửa sổ chat
-            initChatbot();
-            
-            // Thêm console.log để kiểm tra nút chat
-            console.log('Chatbot.js đã được tải - kiểm tra nút chat');
-            
-            // Xóa tất cả sự kiện click cũ
-            const oldButton = chatButton.cloneNode(true);
-            chatButton.parentNode.replaceChild(oldButton, chatButton);
-            
-            // Thêm sự kiện click mới
-            oldButton.addEventListener('click', function(e) {
-              console.log('Nút chat được click - từ chatbot.js');
-              console.log('Event:', e);
-              console.log('Button:', this);
-              e.preventDefault();
-              e.stopPropagation();
-              
-              // Hiển thị cửa sổ chat
-              const chatWindow = document.querySelector('.chatbot-window');
-              if (chatWindow) {
-                chatWindow.classList.toggle('active');
-              }
-              return false;
-            }, true);
-        } else {
-            console.log('Chatbot.js - Không tìm thấy nút chat với ID chat-toggle-button');
-            // Khởi tạo chatbot và gắn sự kiện click
-            initChatbot();
-            console.log('Chatbot initialized');
-            
-            // Kiểm tra xem chatbot container có được thêm vào DOM không
-            const chatbotContainer = document.querySelector('.chatbot-container');
-            if (chatbotContainer) {
-                console.log('Chatbot container found in DOM');
-            } else {
-                console.error('Chatbot container NOT found in DOM');
-            }
-            
-            // Thiết lập các sự kiện cho chatbot
-            setupChatbotEvents();
-            
-            // Đảm bảo nút chat tĩnh có sự kiện click
-            const staticChatbot = document.getElementById('static-chatbot-button');
-            if (staticChatbot) {
-                const staticToggle = staticChatbot.querySelector('.chatbot-toggle');
-                if (staticToggle) {
-                    console.log('Adding click event to static toggle button');
-                    // Xóa tất cả sự kiện click cũ
-                    const newToggle = staticToggle.cloneNode(true);
-                    staticToggle.parentNode.replaceChild(newToggle, staticToggle);
-                    
-                    // Thêm sự kiện click mới
-                    newToggle.addEventListener('click', function(e) {
-                        console.log('Static toggle button clicked from chatbot.js');
-                        const chatWindow = staticChatbot.querySelector('.chatbot-window');
-                        if (chatWindow) {
-                            chatWindow.classList.toggle('active');
-                        }
-                        e.stopPropagation(); // Ngăn sự kiện lan truyền
-                    });
-                }
-            }
-        }
-    }, 500);
+// Khởi tạo chatbot khi trang được tải
+document.addEventListener('DOMContentLoaded', () => {
+    initChatbot();
 });
 
 // Hàm khởi tạo chatbot
 function initChatbot() {
-    // Kiểm tra xem đã có nút chat tĩnh chưa
-    const existingChatbot = document.getElementById('static-chatbot-button');
+    // Biến để kiểm tra xem chatbot đã được khởi tạo chưa
+    if (window.chatbotInitialized) {
+        return;
+    }
     
-    if (existingChatbot) {
-        console.log('Static chatbot button already exists, using it instead');
+    // Tạo các phần tử HTML cho chatbot
+    createChatbotElements();
+    
+    // Thiết lập các sự kiện
+    setupEventListeners();
+    
+    // Hiển thị tin nhắn chào mừng
+    displayWelcomeMessage();
+    
+    // Đánh dấu chatbot đã được khởi tạo
+    window.chatbotInitialized = true;
+}
+
+// Tạo các phần tử HTML cho chatbot
+function createChatbotElements() {
+    // Kiểm tra xem chatbot đã tồn tại chưa
+    if (document.getElementById('weather-chatbot')) {
+        return;
+    }
+    
+    // Tạo container cho chatbot
+    const chatbotContainer = document.createElement('div');
+    chatbotContainer.id = 'weather-chatbot';
+    chatbotContainer.className = 'weather-chatbot';
+    
+    // Tạo nút toggle chatbot
+    const chatbotToggle = document.createElement('button');
+    chatbotToggle.id = 'chatbot-toggle';
+    chatbotToggle.className = 'chatbot-toggle';
+    chatbotToggle.innerHTML = '<i class="fas fa-comment-dots"></i>';
+    chatbotToggle.setAttribute('aria-label', 'Mở trợ lý thời tiết');
+    
+    // Tạo khung chat
+    const chatbotWindow = document.createElement('div');
+    chatbotWindow.id = 'chatbot-window';
+    chatbotWindow.className = 'chatbot-window';
+    
+    // Tạo header cho chatbot
+    const chatbotHeader = document.createElement('div');
+    chatbotHeader.className = 'chatbot-header';
+    chatbotHeader.innerHTML = `
+        <div class="chatbot-title">
+            <i class="fas fa-cloud-sun"></i>
+            <span>Trợ lý thời tiết</span>
+        </div>
+        <button class="chatbot-close" aria-label="Đóng trợ lý thời tiết">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    // Tạo khu vực hiển thị tin nhắn
+    const chatbotMessages = document.createElement('div');
+    chatbotMessages.id = 'chatbot-messages';
+    chatbotMessages.className = 'chatbot-messages';
+    
+    // Tạo khu vực nhập tin nhắn
+    const chatbotInput = document.createElement('div');
+    chatbotInput.className = 'chatbot-input';
+    chatbotInput.innerHTML = `
+        <input type="text" id="chatbot-message-input" placeholder="Hỏi về thời tiết..." aria-label="Nhập tin nhắn">
+        <button id="chatbot-send" aria-label="Gửi tin nhắn">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    `;
+    
+    // Tạo khu vực gợi ý nhanh
+    const quickSuggestions = document.createElement('div');
+    quickSuggestions.className = 'chatbot-quick-suggestions';
+    quickSuggestions.innerHTML = `
+        <button class="suggestion-btn">Thời tiết hiện tại</button>
+        <button class="suggestion-btn">Có mưa không?</button>
+        <button class="suggestion-btn">Nên mặc gì hôm nay?</button>
+    `;
+    
+    // Ghép các phần tử lại với nhau
+    chatbotWindow.appendChild(chatbotHeader);
+    chatbotWindow.appendChild(chatbotMessages);
+    chatbotWindow.appendChild(quickSuggestions);
+    chatbotWindow.appendChild(chatbotInput);
+    
+    chatbotContainer.appendChild(chatbotToggle);
+    chatbotContainer.appendChild(chatbotWindow);
+    
+    // Thêm chatbot vào body
+    document.body.appendChild(chatbotContainer);
+}
+
+// Thiết lập các sự kiện cho chatbot
+function setupEventListeners() {
+    // Nút toggle để hiện/ẩn chatbot
+    const chatbotToggle = document.getElementById('chatbot-toggle');
+    const chatbotWindow = document.getElementById('chatbot-window');
+    const chatbotClose = document.querySelector('.chatbot-close');
+    const chatbotInput = document.getElementById('chatbot-message-input');
+    const chatbotSend = document.getElementById('chatbot-send');
+    const suggestionButtons = document.querySelectorAll('.suggestion-btn');
+    
+    if (chatbotToggle) {
+        // Xóa tất cả event listener cũ trước khi thêm mới
+        chatbotToggle.replaceWith(chatbotToggle.cloneNode(true));
+        const newChatbotToggle = document.getElementById('chatbot-toggle');
         
-        // Kiểm tra xem cửa sổ chat đã tồn tại chưa
-        let existingWindow = existingChatbot.querySelector('.chatbot-window');
-        if (!existingWindow) {
-            console.log('Creating chat window in static button');
-            // Tạo cửa sổ chat nếu chưa tồn tại
-            existingWindow = document.createElement('div');
-            existingWindow.className = 'chatbot-window';
-            existingWindow.innerHTML = `
-                <div class="chatbot-header">
-                    <div class="chatbot-title">Trợ lý thời tiết</div>
-                    <button class="chatbot-close"><i class="fas fa-times"></i></button>
+        newChatbotToggle.addEventListener('click', () => {
+            chatbotWindow.classList.toggle('active');
+            newChatbotToggle.classList.toggle('active');
+            
+            // Nếu chatbot đang mở, focus vào input
+            if (chatbotWindow.classList.contains('active')) {
+                chatbotInput.focus();
+            }
+        });
+    }
+    
+    if (chatbotClose) {
+        // Xóa tất cả event listener cũ trước khi thêm mới
+        chatbotClose.replaceWith(chatbotClose.cloneNode(true));
+        const newChatbotClose = document.querySelector('.chatbot-close');
+        
+        newChatbotClose.addEventListener('click', () => {
+            chatbotWindow.classList.remove('active');
+            document.getElementById('chatbot-toggle').classList.remove('active');
+        });
+    }
+    
+    // Xử lý sự kiện gửi tin nhắn
+    if (chatbotSend) {
+        // Xóa tất cả event listener cũ trước khi thêm mới
+        chatbotSend.replaceWith(chatbotSend.cloneNode(true));
+        const newChatbotSend = document.getElementById('chatbot-send');
+        
+        newChatbotSend.addEventListener('click', () => {
+            sendMessage();
+        });
+    }
+    
+    if (chatbotInput) {
+        // Xóa tất cả event listener cũ trước khi thêm mới
+        chatbotInput.replaceWith(chatbotInput.cloneNode(true));
+        const newChatbotInput = document.getElementById('chatbot-message-input');
+        
+        newChatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
+    
+    // Xử lý các nút gợi ý nhanh - Đảm bảo chỉ đăng ký sự kiện một lần
+    if (suggestionButtons && suggestionButtons.length > 0) {
+        // Xóa tất cả event listener cũ bằng cách thay thế các nút
+        suggestionButtons.forEach(button => {
+            button.replaceWith(button.cloneNode(true));
+        });
+        
+        // Lấy lại các nút mới sau khi thay thế
+        const newSuggestionButtons = document.querySelectorAll('.suggestion-btn');
+        
+        newSuggestionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const text = button.textContent;
+                document.getElementById('chatbot-message-input').value = text;
+                
+                // Vô hiệu hóa tất cả các nút gợi ý trước khi gửi tin nhắn
+                newSuggestionButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.pointerEvents = 'none';
+                });
+                
+                sendMessage();
+                
+                // Kích hoạt lại các nút sau khi nhận được phản hồi
+                setTimeout(() => {
+                    newSuggestionButtons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.style.pointerEvents = 'auto';
+                    });
+                }, 2000); // Thời gian đủ để nhận phản hồi
+            });
+        });
+    }
+    
+    // Lắng nghe sự kiện cập nhật dữ liệu thời tiết
+    document.addEventListener('weatherDataUpdated', (e) => {
+        currentWeatherData = e.detail;
+        console.log('Chatbot received weather data:', currentWeatherData);
+    });
+}
+
+// Hiển thị tin nhắn chào mừng
+function displayWelcomeMessage() {
+    const messages = document.getElementById('chatbot-messages');
+    if (!messages) return;
+    
+    const welcomeMessage = `
+        <div class="chatbot-message bot">
+            <div class="message-content">
+                <p>Xin chào! Tôi là trợ lý thời tiết. Tôi có thể giúp bạn:</p>
+                <ul>
+                    <li>Thông báo nhiệt độ và thời tiết hiện tại</li>
+                    <li>Cho biết có nguy cơ mưa hay không</li>
+                    <li>Gợi ý trang phục phù hợp với thời tiết</li>
+                </ul>
+                <p>Bạn muốn biết thông tin gì?</p>
+            </div>
+        </div>
+    `;
+    
+    messages.innerHTML = welcomeMessage;
+    scrollToBottom();
+}
+
+// Gửi tin nhắn từ người dùng
+function sendMessage() {
+    const input = document.getElementById('chatbot-message-input');
+    const messages = document.getElementById('chatbot-messages');
+    
+    if (!input || !messages) return;
+    
+    const userMessage = input.value.trim();
+    if (userMessage === '') return;
+    
+    // Hiển thị tin nhắn của người dùng
+    const userMessageHTML = `
+        <div class="chatbot-message user">
+            <div class="message-content">
+                <p>${escapeHTML(userMessage)}</p>
+            </div>
+        </div>
+    `;
+    
+    messages.innerHTML += userMessageHTML;
+    input.value = '';
+    scrollToBottom();
+    
+    // Hiển thị trạng thái đang nhập
+    showTypingIndicator();
+    
+    // Xử lý tin nhắn và phản hồi sau một khoảng thời gian ngắn
+    setTimeout(() => {
+        processUserMessage(userMessage);
+    }, 500);
+}
+
+// Hiển thị chỉ báo đang nhập
+function showTypingIndicator() {
+    const messages = document.getElementById('chatbot-messages');
+    if (!messages) return;
+    
+    const typingIndicator = document.createElement('div');
+    typingIndicator.className = 'chatbot-message bot typing';
+    typingIndicator.innerHTML = `
+        <div class="message-content">
+            <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    `;
+    
+    messages.appendChild(typingIndicator);
+    scrollToBottom();
+}
+
+// Xóa chỉ báo đang nhập
+function removeTypingIndicator() {
+    const typingIndicator = document.querySelector('.typing-indicator');
+    if (typingIndicator) {
+        const parentMessage = typingIndicator.closest('.chatbot-message.typing');
+        if (parentMessage) {
+            parentMessage.remove();
+        }
+    }
+}
+
+// Xử lý tin nhắn của người dùng
+function processUserMessage(message) {
+    // Chuyển tin nhắn về chữ thường để dễ so sánh
+    const lowerMessage = message.toLowerCase();
+    
+    // Kiểm tra xem có dữ liệu thời tiết không
+    if (!currentWeatherData) {
+        // Nếu không có dữ liệu thời tiết, yêu cầu người dùng tìm kiếm thành phố trước
+        const response = `
+            <div class="chatbot-message bot">
+                <div class="message-content">
+                    <p>Vui lòng tìm kiếm một thành phố trước để tôi có thể cung cấp thông tin thời tiết.</p>
+                    <p>Bạn có thể tìm kiếm thành phố ở thanh tìm kiếm phía trên hoặc chuyển đến trang Dự báo.</p>
                 </div>
-                <div class="chatbot-messages"></div>
-                <div class="typing-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+            </div>
+        `;
+        
+        removeTypingIndicator();
+        const messages = document.getElementById('chatbot-messages');
+        messages.innerHTML += response;
+        scrollToBottom();
+        return;
+    }
+    
+    // Xử lý các loại câu hỏi khác nhau
+    let botResponse = '';
+    
+    // Thời tiết hiện tại
+    if (lowerMessage.includes('thời tiết') || 
+        lowerMessage.includes('nhiệt độ') || 
+        lowerMessage.includes('hiện tại') || 
+        lowerMessage.includes('bây giờ')) {
+        
+        const temp = Math.round(currentWeatherData.main.temp);
+        const feelsLike = Math.round(currentWeatherData.main.feels_like);
+        const description = currentWeatherData.weather[0].description;
+        const location = `${currentWeatherData.name}, ${currentWeatherData.sys.country}`;
+        const humidity = currentWeatherData.main.humidity;
+        const windSpeed = Math.round(currentWeatherData.wind.speed * 3.6); // Chuyển từ m/s sang km/h
+        const pressure = currentWeatherData.main.pressure;
+        
+        // Đánh giá thời tiết
+        let weatherEvaluation = '';
+        if (temp < 10) {
+            weatherEvaluation = 'Thời tiết khá lạnh, bạn nên mặc ấm khi ra ngoài.';
+        } else if (temp < 20) {
+            weatherEvaluation = 'Thời tiết mát mẻ, thích hợp cho các hoạt động ngoài trời.';
+        } else if (temp < 30) {
+            weatherEvaluation = 'Thời tiết ấm áp, rất tốt cho các hoạt động ngoài trời.';
+        } else {
+            weatherEvaluation = 'Thời tiết khá nóng, hãy uống nhiều nước và tránh nắng gay gắt.';
+        }
+        
+        botResponse = `
+            <div class="chatbot-message bot">
+                <div class="message-content">
+                    <p>Thời tiết hiện tại tại ${location}:</p>
+                    <ul>
+                        <li>Nhiệt độ: ${temp}°C</li>
+                        <li>Cảm giác như: ${feelsLike}°C</li>
+                        <li>Thời tiết: ${description}</li>
+                        <li>Độ ẩm: ${humidity}%</li>
+                        <li>Tốc độ gió: ${windSpeed} km/h</li>
+                        <li>Áp suất: ${pressure} hPa</li>
+                    </ul>
+                    <p>${weatherEvaluation}</p>
                 </div>
-                <div class="chatbot-input">
-                    <input type="text" placeholder="Hỏi về thời tiết..." />
-                    <button class="chatbot-send" disabled><i class="fas fa-paper-plane"></i></button>
+            </div>
+        `;
+    }
+    // Nguy cơ mưa
+    else if (lowerMessage.includes('mưa') || 
+             lowerMessage.includes('trời mưa') || 
+             lowerMessage.includes('có mưa')) {
+        
+        const weatherId = currentWeatherData.weather[0].id;
+        const isRaining = weatherId >= 200 && weatherId < 700;
+        const willRain = currentWeatherData.pop > 0.3; // Nếu có dữ liệu xác suất mưa
+        const humidity = currentWeatherData.main.humidity;
+        const clouds = currentWeatherData.clouds ? currentWeatherData.clouds.all : 0;
+        
+        let rainAdvice = '';
+        
+        if (isRaining) {
+            if (weatherId >= 200 && weatherId < 300) {
+                rainAdvice = 'Hiện tại đang có giông bão. Bạn nên ở trong nhà và tránh các khu vực cao, hở.';
+            } else if (weatherId >= 300 && weatherId < 400) {
+                rainAdvice = 'Hiện tại đang có mưa phùn. Bạn nên mang theo áo mưa nhẹ hoặc ô khi ra ngoài.';
+            } else if (weatherId >= 500 && weatherId < 600) {
+                rainAdvice = 'Hiện tại đang có mưa. Bạn nên mang theo ô hoặc áo mưa khi ra ngoài.';
+            } else if (weatherId >= 600 && weatherId < 700) {
+                rainAdvice = 'Hiện tại đang có tuyết. Bạn nên mặc ấm và mang giày chống trượt khi ra ngoài.';
+            }
+            
+            botResponse = `
+                <div class="chatbot-message bot">
+                    <div class="message-content">
+                        <p>${rainAdvice}</p>
+                        <p>Độ ẩm hiện tại: ${humidity}%, Mây che phủ: ${clouds}%</p>
+                    </div>
                 </div>
             `;
-            existingChatbot.appendChild(existingWindow);
-            
-            // Thêm tin nhắn chào mừng
-            const messagesContainer = existingWindow.querySelector('.chatbot-messages');
-            if (messagesContainer) {
-                const welcomeMessage = document.createElement('div');
-                welcomeMessage.className = 'message bot-message';
-                welcomeMessage.textContent = 'Xin chào! Tôi là trợ lý thời tiết. Bạn có thể hỏi tôi về thời tiết ở bất kỳ đâu.';
-                messagesContainer.appendChild(welcomeMessage);
-            }
-        }
-        
-        // Đảm bảo cửa sổ chat có thể hiển thị khi click vào nút chat
-        const chatbotToggle = existingChatbot.querySelector('.chatbot-toggle');
-        if (chatbotToggle && existingWindow) {
-            // Xóa tất cả sự kiện click cũ
-            const newToggle = chatbotToggle.cloneNode(true);
-            chatbotToggle.parentNode.replaceChild(newToggle, chatbotToggle);
-            
-            // Thêm sự kiện click mới
-            newToggle.addEventListener('click', function(e) {
-                console.log('Static toggle button clicked from initChatbot');
-                existingWindow.classList.toggle('active');
-                e.stopPropagation(); // Ngăn sự kiện lan truyền
-            });
-            
-            // Thiết lập sự kiện đóng chat
-            const closeButton = existingWindow.querySelector('.chatbot-close');
-            if (closeButton) {
-                closeButton.addEventListener('click', function() {
-                    existingWindow.classList.remove('active');
-                });
-            }
-            
-            // Thiết lập sự kiện gửi tin nhắn
-            const inputField = existingWindow.querySelector('.chatbot-input input');
-            const sendButton = existingWindow.querySelector('.chatbot-send');
-            
-            if (inputField && sendButton) {
-                inputField.addEventListener('input', function() {
-                    sendButton.disabled = !this.value.trim();
-                });
-                
-                sendButton.addEventListener('click', function() {
-                    if (inputField.value.trim()) {
-                        sendMessage();
-                    }
-                });
-                
-                inputField.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' && this.value.trim()) {
-                        sendMessage();
-                    }
-                });
-            }
-        }
-        
-        return; // Tránh thêm nhiều cửa sổ chat
-        }
-        
-        // Thêm cửa sổ chat vào nút chat tĩnh
-        const chatWindowHTML = `
-            <div class="chatbot-window">
-                <div class="chatbot-header">
-                    <div class="chatbot-title">
-                        <i class="fas fa-robot"></i> Trợ lý thời tiết
-                    </div>
-                    <button class="chatbot-close">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="chatbot-messages">
-                    <div class="message bot-message">
-                        Xin chào! Tôi là trợ lý thời tiết. Bạn có thể hỏi tôi về thời tiết ở bất kỳ đâu, ví dụ: "Hôm nay ở Hà Nội có mưa không?"
+        } else if (willRain) {
+            botResponse = `
+                <div class="chatbot-message bot">
+                    <div class="message-content">
+                        <p>Có khả năng sẽ mưa. Bạn nên chuẩn bị ô hoặc áo mưa khi ra ngoài.</p>
+                        <p>Độ ẩm hiện tại: ${humidity}%, Mây che phủ: ${clouds}%</p>
+                        <p>Với độ ẩm và lượng mây hiện tại, khả năng mưa trong vài giờ tới là khá cao.</p>
                     </div>
                 </div>
-                <div class="typing-indicator">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                </div>
-                <div class="chatbot-input">
-                    <input type="text" placeholder="Nhập câu hỏi của bạn..." />
-                    <button class="chatbot-send" disabled>
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-        existingChatbot.insertAdjacentHTML('beforeend', chatWindowHTML);
-        console.log('Chat window added to static button');
-        
-        // Thiết lập lại các sự kiện cho chatbot sau khi thêm cửa sổ chat
-        setTimeout(() => {
-            setupChatbotEvents();
-            console.log('Chatbot events re-setup after adding to static button');
-        }, 100);
-    } 
-        // Tạo cấu trúc HTML cho chatbot
-        const chatbotHTML = `
-            <div class="chatbot-container" style="display: block !important;">
-                <button class="chatbot-toggle" style="display: block !important; background-color: #667eea;">
-                    <i class="fas fa-comment" style="color: white;"></i>
-                </button>
-                <div class="chatbot-window">
-                    <div class="chatbot-header">
-                        <div class="chatbot-title">
-                            <i class="fas fa-robot"></i> Trợ lý thời tiết
-                        </div>
-                        <button class="chatbot-close">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="chatbot-messages">
-                        <div class="message bot-message">
-                            Xin chào! Tôi là trợ lý thời tiết. Bạn có thể hỏi tôi về thời tiết ở bất kỳ đâu, ví dụ: "Hôm nay ở Hà Nội có mưa không?"
-                        </div>
-                    </div>
-                    <div class="typing-indicator">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
-                    <div class="chatbot-input">
-                        <input type="text" placeholder="Nhập câu hỏi của bạn..." />
-                        <button class="chatbot-send" disabled>
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Thêm chatbot vào body
-        try {
-            document.body.insertAdjacentHTML('beforeend', chatbotHTML);
-            console.log('Chatbot HTML added to body');
-        } catch (error) {
-            console.error('Error adding chatbot to body:', error);
-        }
-
-    // Lấy các phần tử DOM
-    const chatbotToggle = document.querySelector('.chatbot-toggle');
-    const chatbotWindow = document.querySelector('.chatbot-window');
-    const chatbotClose = document.querySelector('.chatbot-close');
-    const chatbotInput = document.querySelector('.chatbot-input input');
-    const chatbotSend = document.querySelector('.chatbot-send');
-    const chatbotMessages = document.querySelector('.chatbot-messages');
-    const typingIndicator = document.querySelector('.typing-indicator');
-    
-    // Thêm sự kiện click cho các tin nhắn ban đầu
-    const initialMessages = document.querySelectorAll('.message');
-    initialMessages.forEach(message => {
-        message.addEventListener('click', function() {
-            console.log('Initial message clicked');
-            chatbotWindow.classList.add('active');
-        });
-    });
-
-    // Xử lý sự kiện đóng/mở chatbot
-    chatbotToggle.addEventListener('click', () => {
-        chatbotWindow.classList.toggle('active');
-    });
-
-    chatbotClose.addEventListener('click', () => {
-        chatbotWindow.classList.remove('active');
-    });
-
-    // Xử lý sự kiện nhập liệu
-    chatbotInput.addEventListener('input', () => {
-        chatbotSend.disabled = chatbotInput.value.trim() === '';
-    });
-
-    // Xử lý sự kiện gửi tin nhắn
-    chatbotSend.addEventListener('click', () => {
-        sendMessage();
-    });
-
-    chatbotInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
-
-    // Hàm gửi tin nhắn
-    function sendMessage() {
-        // Tìm kiếm trong static-chatbot-button trước
-        const staticChatbot = document.getElementById('static-chatbot-button');
-        let chatbotInput, messagesContainer, chatbotSend;
-        
-        if (staticChatbot) {
-            chatbotInput = staticChatbot.querySelector('.chatbot-input input');
-            messagesContainer = staticChatbot.querySelector('.chatbot-messages');
-            chatbotSend = staticChatbot.querySelector('.chatbot-send');
-        }
-        
-        // Nếu không tìm thấy trong static-chatbot-button, tìm trong document
-        if (!chatbotInput || !messagesContainer) {
-            chatbotInput = document.querySelector('.chatbot-input input');
-            messagesContainer = document.querySelector('.chatbot-messages');
-            chatbotSend = document.querySelector('.chatbot-send');
-        }
-        
-        if (!chatbotInput || !messagesContainer) {
-            console.error('Chatbot input or messages container not found');
-            return;
-        }
-        
-        const message = chatbotInput.value.trim();
-        if (message === '') return;
-
-        // Hiển thị tin nhắn của người dùng
-        addMessage(message, 'user');
-
-        // Xóa input
-        chatbotInput.value = '';
-        if (chatbotSend) {
-            chatbotSend.disabled = true;
-        }
-
-        // Hiển thị typing indicator
-        showTypingIndicator();
-
-        // Xử lý câu hỏi và trả lời
-        processUserQuery(message);
-    }
-
-    // Hàm thêm tin nhắn vào khung chat
-    function addMessage(text, sender) {
-        // Tìm kiếm trong static-chatbot-button trước
-        const staticChatbot = document.getElementById('static-chatbot-button');
-        let messagesContainer;
-        
-        if (staticChatbot) {
-            messagesContainer = staticChatbot.querySelector('.chatbot-messages');
-        }
-        
-        // Nếu không tìm thấy trong static-chatbot-button, tìm trong document
-        if (!messagesContainer) {
-            messagesContainer = document.querySelector('.chatbot-messages');
-        }
-        
-        if (!messagesContainer) {
-            console.error('Messages container not found');
-            return;
-        }
-        
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message');
-        messageElement.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
-        messageElement.textContent = text;
-        
-        // Thêm sự kiện click cho tin nhắn để hiển thị khung chat
-        messageElement.addEventListener('click', function() {
-            const chatbotWindow = staticChatbot ? staticChatbot.querySelector('.chatbot-window') : document.querySelector('.chatbot-window');
-            if (chatbotWindow) {
-                chatbotWindow.classList.add('active');
-            }
-        });
-        
-        messagesContainer.appendChild(messageElement);
-        
-        // Cuộn xuống tin nhắn mới nhất
-        scrollToBottom();
-    }
-
-    // Hàm cuộn xuống cuối khung chat
-    function scrollToBottom() {
-        // Tìm kiếm trong static-chatbot-button trước
-        const staticChatbot = document.getElementById('static-chatbot-button');
-        let messagesContainer;
-        
-        if (staticChatbot) {
-            messagesContainer = staticChatbot.querySelector('.chatbot-messages');
-        }
-        
-        // Nếu không tìm thấy trong static-chatbot-button, tìm trong document
-        if (!messagesContainer) {
-            messagesContainer = document.querySelector('.chatbot-messages');
-        }
-        
-        if (messagesContainer) {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-    }
-
-    // Hiển thị typing indicator
-    function showTypingIndicator() {
-        // Tìm kiếm trong static-chatbot-button trước
-        const staticChatbot = document.getElementById('static-chatbot-button');
-        let typingIndicator;
-        
-        if (staticChatbot) {
-            typingIndicator = staticChatbot.querySelector('.typing-indicator');
-        }
-        
-        // Nếu không tìm thấy trong static-chatbot-button, tìm trong document
-        if (!typingIndicator) {
-            typingIndicator = document.querySelector('.typing-indicator');
-        }
-        
-        if (typingIndicator) {
-            typingIndicator.classList.add('active');
-        }
-    }
-
-    // Ẩn typing indicator
-    function hideTypingIndicator() {
-        // Tìm kiếm trong static-chatbot-button trước
-        const staticChatbot = document.getElementById('static-chatbot-button');
-        let typingIndicator;
-        
-        if (staticChatbot) {
-            typingIndicator = staticChatbot.querySelector('.typing-indicator');
-        }
-        
-        // Nếu không tìm thấy trong static-chatbot-button, tìm trong document
-        if (!typingIndicator) {
-            typingIndicator = document.querySelector('.typing-indicator');
-        }
-        
-        if (typingIndicator) {
-            typingIndicator.classList.remove('active');
-        }
-    }
-
-    // Xử lý câu hỏi của người dùng
-    async function processUserQuery(query) {
-        try {
-            // Phân tích câu hỏi để tìm địa điểm và thời gian
-            const { location, time, weatherType } = parseQuery(query);
-    
-            // Hàm hiển thị tin nhắn và đảm bảo khung chat hiển thị
-            const showBotMessage = (message) => {
-                hideTypingIndicator();
-                addMessage(message, 'bot');
-                
-                // Đảm bảo khung chat hiển thị khi có tin nhắn mới
-                const staticChatbot = document.getElementById('static-chatbot-button');
-                if (staticChatbot) {
-                    const chatbotWindow = staticChatbot.querySelector('.chatbot-window');
-                    if (chatbotWindow && !chatbotWindow.classList.contains('active')) {
-                        chatbotWindow.classList.add('active');
-                    }
-                }
-            };
-
-            if (!location) {
-                setTimeout(() => {
-                    showBotMessage('Vui lòng cho tôi biết bạn muốn xem thời tiết ở đâu?');
-                }, 1000);
-                return;
-            }
-
-            // Lấy dữ liệu thời tiết
-            const weatherData = await getWeatherData(location, time);
-            
-            // Tạo câu trả lời
-            const response = generateResponse(weatherData, location, time, weatherType);
-            
-            // Hiển thị câu trả lời sau một khoảng thời gian ngắn để mô phỏng suy nghĩ
-            setTimeout(() => {
-                showBotMessage(response);
-            }, 1500);
-
-        } catch (error) {
-            console.error('Error processing query:', error);
-            setTimeout(() => {
-                hideTypingIndicator();
-                addMessage('Xin lỗi, tôi không thể trả lời câu hỏi này. Vui lòng thử lại sau.', 'bot');
-            }, 1000);
-        }
-    }
-
-    // Phân tích câu hỏi để tìm địa điểm và thời gian
-    function parseQuery(query) {
-        query = query.toLowerCase();
-        
-        // Tìm địa điểm
-        let location = null;
-        
-        // Danh sách các từ khóa địa điểm phổ biến
-        const locationKeywords = [
-            'ở', 'tại', 'của', 'thành phố', 'tỉnh', 'huyện', 'quận'
-        ];
-        
-        // Danh sách các tỉnh thành Việt Nam
-        const vietnamProvinces = [
-            'hà nội', 'hồ chí minh', 'đà nẵng', 'hải phòng', 'cần thơ',
-            'an giang', 'bà rịa vũng tàu', 'bắc giang', 'bắc kạn', 'bạc liêu',
-            'bắc ninh', 'bến tre', 'bình định', 'bình dương', 'bình phước',
-            'bình thuận', 'cà mau', 'cao bằng', 'đắk lắk', 'đắk nông',
-            'điện biên', 'đồng nai', 'đồng tháp', 'gia lai', 'hà giang',
-            'hà nam', 'hà tĩnh', 'hải dương', 'hậu giang', 'hòa bình',
-            'hưng yên', 'khánh hòa', 'kiên giang', 'kon tum', 'lai châu',
-            'lâm đồng', 'lạng sơn', 'lào cai', 'long an', 'nam định',
-            'nghệ an', 'ninh bình', 'ninh thuận', 'phú thọ', 'phú yên',
-            'quảng bình', 'quảng nam', 'quảng ngãi', 'quảng ninh', 'quảng trị',
-            'sóc trăng', 'sơn la', 'tây ninh', 'thái bình', 'thái nguyên',
-            'thanh hóa', 'thừa thiên huế', 'tiền giang', 'trà vinh', 'tuyên quang',
-            'vĩnh long', 'vĩnh phúc', 'yên bái', 'sài gòn', 'huế'
-        ];
-
-        // Tìm tỉnh thành trong câu hỏi
-        for (const province of vietnamProvinces) {
-            if (query.includes(province)) {
-                location = province;
-                break;
-            }
-        }
-
-        // Nếu không tìm thấy tỉnh thành cụ thể, tìm từ khóa địa điểm
-        if (!location) {
-            for (const keyword of locationKeywords) {
-                const keywordIndex = query.indexOf(` ${keyword} `);
-                if (keywordIndex !== -1) {
-                    // Lấy từ sau từ khóa
-                    const afterKeyword = query.substring(keywordIndex + keyword.length + 1).trim();
-                    const nextSpace = afterKeyword.indexOf(' ');
-                    location = nextSpace !== -1 ? afterKeyword.substring(0, nextSpace) : afterKeyword;
-                    break;
-                }
-            }
-        }
-
-        // Tìm thời gian
-        let time = 'current'; // Mặc định là hiện tại
-        
-        if (query.includes('ngày mai') || query.includes('tomorrow')) {
-            time = 'tomorrow';
-        } else if (query.includes('hôm nay') || query.includes('today')) {
-            time = 'today';
-        } else if (query.includes('tuần này') || query.includes('this week')) {
-            time = 'week';
-        }
-
-        // Tìm loại thời tiết người dùng đang hỏi
-        let weatherType = 'general'; // Mặc định là thông tin chung
-        
-        if (query.includes('mưa') || query.includes('rain')) {
-            weatherType = 'rain';
-        } else if (query.includes('nhiệt độ') || query.includes('nóng') || query.includes('lạnh') || 
-                  query.includes('temperature') || query.includes('hot') || query.includes('cold')) {
-            weatherType = 'temperature';
-        } else if (query.includes('gió') || query.includes('wind')) {
-            weatherType = 'wind';
-        } else if (query.includes('độ ẩm') || query.includes('humidity')) {
-            weatherType = 'humidity';
-        } else if (query.includes('nắng') || query.includes('sunny')) {
-            weatherType = 'sunny';
-        }
-
-        return { location, time, weatherType };
-    }
-
-    // Lấy dữ liệu thời tiết từ API
-    async function getWeatherData(location, time) {
-        try {
-            // Chuyển đổi tên tỉnh thành thành phố nếu có trong bản đồ
-            let searchCity = location.toLowerCase().trim();
-            const provinceToCityMap = {
-                // Miền Bắc
-                'hà giang': 'Ha Giang', 'ha giang': 'Ha Giang', // Hà Giang
-                'cao bằng': 'Cao Bang', 'cao bang': 'Cao Bang', // Cao Bằng
-                'bắc kạn': 'Bac Kan', 'bac kan': 'Bac Kan', // Bắc Kạn
-                'lạng sơn': 'Lang Son', 'lang son': 'Lang Son', // Lạng Sơn
-                'tuyên quang': 'Tuyen Quang', 'tuyen quang': 'Tuyen Quang', // Tuyên Quang
-                'thái nguyên': 'Thai Nguyen', 'thai nguyen': 'Thai Nguyen', // Thái Nguyên
-                'phú thọ': 'Phu Tho', 'phu tho': 'Phu Tho', // Phú Thọ
-                'bắc giang': 'Bac Giang', 'bac giang': 'Bac Giang', // Bắc Giang
-                'quảng ninh': 'Quang Ninh', 'quang ninh': 'Quang Ninh', // Quảng Ninh
-                'lào cai': 'Lao Cai', 'lao cai': 'Lao Cai', // Lào Cai
-                'yên bái': 'Yen Bai', 'yen bai': 'Yen Bai', // Yên Bái
-                'điện biên': 'Dien Bien', 'dien bien': 'Dien Bien', // Điện Biên
-                'điện biên phủ': 'Dien Bien Phu', 'dien bien phu': 'Dien Bien Phu', // Điện Biên Phủ
-                'lai châu': 'Lai Chau', 'lai chau': 'Lai Chau', // Lai Châu
-                'sơn la': 'Son La', 'son la': 'Son La', // Sơn La
-                'bắc ninh': 'Bac Ninh', 'bac ninh': 'Bac Ninh', // Bắc Ninh
-                'hà nam': 'Ha Nam', 'ha nam': 'Ha Nam', // Hà Nam
-                'hải dương': 'Hai Duong', 'hai duong': 'Hai Duong', // Hải Dương
-                'hưng yên': 'Hung Yen', 'hung yen': 'Hung Yen', // Hưng Yên
-                'nam định': 'Nam Dinh', 'nam dinh': 'Nam Dinh', // Nam Định
-                'ninh bình': 'Ninh Binh', 'ninh binh': 'Ninh Binh', // Ninh Bình
-                'thái bình': 'Thai Binh', 'thai binh': 'Thai Binh', // Thái Bình
-                'vĩnh phúc': 'Vinh Phuc', 'vinh phuc': 'Vinh Phuc', // Vĩnh Phúc
-                'hà nội': 'Hanoi', 'ha noi': 'Hanoi', // Hà Nội (Thành phố trực thuộc TW)
-                'hải phòng': 'Haiphong', 'hai phong': 'Haiphong', // Hải Phòng (Thành phố trực thuộc TW)
-
-                // Miền Trung
-                'thanh hóa': 'Thanh Hoa', 'thanh hoa': 'Thanh Hoa', // Thanh Hóa
-                'nghệ an': 'Nghe An', 'nghe an': 'Nghe An', // Nghệ An
-                'hà tĩnh': 'Ha Tinh', 'ha tinh': 'Ha Tinh', // Hà Tĩnh
-                'quảng bình': 'Quang Binh', 'quang binh': 'Quang Binh', // Quảng Bình
-                'quảng trị': 'Quang Tri', 'quang tri': 'Quang Tri', // Quảng Trị
-                'thừa thiên huế': 'Thua Thien Hue', 'thua thien hue': 'Thua Thien Hue', 'huế': 'Thua Thien Hue', 'hue': 'Thua Thien Hue', // Thừa Thiên Huế
-                'đà nẵng': 'Da Nang', 'da nang': 'Da Nang', // Đà Nẵng (Thành phố trực thuộc TW)
-                'quảng nam': 'Quang Nam', 'quang nam': 'Quang Nam', // Quảng Nam
-                'quảng ngãi': 'Quang Ngai', 'quang ngai': 'Quang Ngai', // Quảng Ngãi
-                'bình định': 'Binh Dinh', 'binh dinh': 'Binh Dinh', // Bình Định
-                'phú yên': 'Phu Yen', 'phu yen': 'Phu Yen', // Phú Yên
-                'khánh hòa': 'Khanh Hoa', 'khanh hoa': 'Khanh Hoa', // Khánh Hòa
-                'ninh thuận': 'Ninh Thuan', 'ninh thuan': 'Ninh Thuan', 'phan rang': 'Ninh Thuan', // Ninh Thuận
-                'bình thuận': 'Binh Thuan', 'binh thuan': 'Binh Thuan', // Bình Thuận
-                'kon tum': 'Kon Tum', // Kon Tum
-                'gia lai': 'Gia Lai', // Gia Lai
-                'đắk lắk': 'Dak Lak', 'dak lak': 'Dak Lak', 'bmt': 'Dak Lak', // Đắk Lắk
-                'đắk nông': 'Dak Nong', 'dak nong': 'Dak Nong', // Đắk Nông
-                'lâm đồng': 'Lam Dong', 'lam dong': 'Lam Dong', // Lâm Đồng
-
-                // Miền Nam
-                'bình phước': 'Binh Phuoc', 'binh phuoc': 'Binh Phuoc', // Bình Phước
-                'bình dương': 'Binh Duong', 'binh duong': 'Binh Duong', // Bình Dương
-                'đồng nai': 'Dong Nai', 'dong nai': 'Dong Nai', // Đồng Nai
-                'tây ninh': 'Tay Ninh', 'tay ninh': 'Tay Ninh', // Tây Ninh
-                'bà rịa vũng tàu': 'Ba Ria - Vung Tau', // Bà Rịa - Vũng Tàu
-                'ba ria vung tau': 'Ba Ria - Vung Tau',
-                'brvt': 'Ba Ria - Vung Tau',
-                'hồ chí minh': 'Ho Chi Minh City', 'ho chi minh city': 'Ho Chi Minh City', 'hcm': 'Ho Chi Minh City', 'tp hcm': 'Ho Chi Minh City', 'sài gòn': 'Ho Chi Minh City', 'sai gon': 'Ho Chi Minh City',
-                'long an': 'Long An', // Long An
-                'đồng tháp': 'Dong Thap', 'dong thap': 'Dong Thap', // Đồng Tháp
-                'tiền giang': 'Tien Giang', 'tien giang': 'Tien Giang', // Tiền Giang
-                'an giang': 'An Giang', // An Giang
-                'bến tre': 'Ben Tre', 'ben tre': 'Ben Tre', // Bến Tre
-                'vĩnh long': 'Vinh Long', 'vinh long': 'Vinh Long', // Vĩnh Long
-                'trà vinh': 'Tra Vinh', 'tra vinh': 'Tra Vinh', // Trà Vinh
-                'hậu giang': 'Hau Giang', 'hau giang': 'Hau Giang', // Hậu Giang
-                'kiên giang': 'Kien Giang', 'kien giang': 'Kien Giang', // Kiên Giang
-                'sóc trăng': 'Soc Trang', 'soc trang': 'Soc Trang', // Sóc Trăng
-                'bạc liêu': 'Bac Lieu', 'bac lieu': 'Bac Lieu', // Bạc Liêu
-                'cà mau': 'Ca Mau', 'ca mau': 'Ca Mau', // Cà Mau
-                'cần thơ': 'Can Tho', 'can tho': 'Can Tho' // Cần Thơ (Thành phố trực thuộc TW)
-            };
-            
-            const mappedCity = provinceToCityMap[searchCity];
-            if (mappedCity) {
-                searchCity = mappedCity;
-            }
-
-            // Lấy dữ liệu thời tiết hiện tại
-            if (time === 'current' || time === 'today') {
-                const response = await fetch(
-                    `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(searchCity)}&units=metric&lang=vi&appid=${API_KEY}`
-                );
-
-                if (!response.ok) {
-                    throw new Error('Không tìm thấy thành phố');
-                }
-
-                return await response.json();
-            } 
-            // Lấy dữ liệu dự báo cho ngày mai hoặc tuần này
-            else {
-                const response = await fetch(
-                    `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(searchCity)}&units=metric&lang=vi&appid=${API_KEY}`
-                );
-
-                if (!response.ok) {
-                    throw new Error('Không tìm thấy thành phố');
-                }
-
-                const data = await response.json();
-                
-                // Xử lý dữ liệu dự báo
-                if (time === 'tomorrow') {
-                    // Lấy dữ liệu cho ngày mai (8 mục, mỗi mục cách nhau 3 giờ)
-                    const tomorrow = new Date();
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    tomorrow.setHours(0, 0, 0, 0);
-                    
-                    const tomorrowForecasts = data.list.filter(item => {
-                        const itemDate = new Date(item.dt * 1000);
-                        return itemDate.getDate() === tomorrow.getDate() &&
-                               itemDate.getMonth() === tomorrow.getMonth() &&
-                               itemDate.getFullYear() === tomorrow.getFullYear();
-                    });
-                    
-                    // Lấy dự báo giữa ngày (trưa)
-                    const middayForecast = tomorrowForecasts.find(item => {
-                        const itemDate = new Date(item.dt * 1000);
-                        return itemDate.getHours() >= 12 && itemDate.getHours() <= 15;
-                    }) || tomorrowForecasts[0];
-                    
-                    return {
-                        ...middayForecast,
-                        name: data.city.name,
-                        sys: { country: data.city.country },
-                        forecast: true
-                    };
-                } else if (time === 'week') {
-                    // Lấy dữ liệu cho 5 ngày tới
-                    return {
-                        ...data,
-                        forecast: true,
-                        forecastType: 'week'
-                    };
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching weather data:', error);
-            throw error;
-        }
-    }
-
-    // Tạo câu trả lời dựa trên dữ liệu thời tiết
-    function generateResponse(weatherData, location, time, weatherType) {
-        if (!weatherData) {
-            return `Xin lỗi, tôi không thể tìm thấy thông tin thời tiết cho ${location}.`;
-        }
-
-        try {
-            // Xử lý dữ liệu dự báo tuần
-            if (weatherData.forecast && weatherData.forecastType === 'week') {
-                return generateWeekForecastResponse(weatherData, location, weatherType);
-            }
-
-            const cityName = weatherData.name;
-            const country = weatherData.sys.country;
-            
-            // Lấy thông tin thời tiết
-            const weather = weatherData.weather[0];
-            const description = weather.description;
-            const temp = Math.round(weatherData.main.temp);
-            const feelsLike = Math.round(weatherData.main.feels_like);
-            const humidity = weatherData.main.humidity;
-            const windSpeed = weatherData.wind.speed;
-            
-            // Xác định thời gian trong câu trả lời
-            let timeString = '';
-            if (time === 'current') {
-                timeString = 'hiện tại';
-            } else if (time === 'today') {
-                timeString = 'hôm nay';
-            } else if (time === 'tomorrow') {
-                timeString = 'ngày mai';
-            }
-
-            // Tạo câu trả lời dựa trên loại thời tiết người dùng hỏi
-            let response = '';
-            
-            if (weatherType === 'rain') {
-                const isRaining = description.includes('mưa') || description.includes('rain');
-                if (isRaining) {
-                    response = `${timeString === 'hiện tại' ? 'Đang' : 'Sẽ'} có mưa ở ${cityName} ${timeString}.`;
-                } else {
-                    response = `${timeString === 'hiện tại' ? 'Không' : 'Sẽ không'} có mưa ở ${cityName} ${timeString}.`;
-                }
-            } else if (weatherType === 'temperature') {
-                response = `Nhiệt độ ở ${cityName} ${timeString} là ${temp}°C, cảm giác như ${feelsLike}°C.`;
-            } else if (weatherType === 'wind') {
-                response = `Tốc độ gió ở ${cityName} ${timeString} là ${windSpeed} m/s.`;
-            } else if (weatherType === 'humidity') {
-                response = `Độ ẩm ở ${cityName} ${timeString} là ${humidity}%.`;
-            } else if (weatherType === 'sunny') {
-                const isSunny = description.includes('nắng') || description.includes('quang') || description.includes('clear');
-                if (isSunny) {
-                    response = `${timeString === 'hiện tại' ? 'Đang' : 'Sẽ'} có nắng ở ${cityName} ${timeString}.`;
-                } else {
-                    response = `${timeString === 'hiện tại' ? 'Không' : 'Sẽ không'} có nắng ở ${cityName} ${timeString}.`;
-                }
+            `;
+        } else {
+            let rainPrediction = '';
+            if (humidity > 80 && clouds > 75) {
+                rainPrediction = 'Tuy nhiên, với độ ẩm và lượng mây hiện tại, vẫn có thể có mưa nhỏ không lường trước được.';
             } else {
-                // Thông tin chung
-                response = `Thời tiết ở ${cityName} ${timeString}: ${description}, nhiệt độ ${temp}°C, cảm giác như ${feelsLike}°C, độ ẩm ${humidity}%, tốc độ gió ${windSpeed} m/s.`;
+                rainPrediction = 'Với độ ẩm và lượng mây hiện tại, khả năng mưa trong vài giờ tới là rất thấp.';
             }
-
-            return response;
-        } catch (error) {
-            console.error('Error generating response:', error);
-            return `Xin lỗi, tôi không thể xử lý thông tin thời tiết cho ${location}.`;
+            
+            botResponse = `
+                <div class="chatbot-message bot">
+                    <div class="message-content">
+                        <p>Hiện tại không có mưa và khả năng mưa thấp.</p>
+                        <p>Độ ẩm hiện tại: ${humidity}%, Mây che phủ: ${clouds}%</p>
+                        <p>${rainPrediction}</p>
+                    </div>
+                </div>
+            `;
         }
     }
-
-    // Tạo câu trả lời cho dự báo tuần
-    function generateWeekForecastResponse(weatherData, location, weatherType) {
-        try {
-            const cityName = weatherData.city.name;
-            const country = weatherData.city.country;
-            
-            // Lấy dự báo cho 5 ngày, mỗi ngày lấy dự báo vào buổi trưa
-            const dailyForecasts = [];
-            const processedDates = new Set();
-            
-            weatherData.list.forEach(forecast => {
-                const forecastDate = new Date(forecast.dt * 1000);
-                const dateString = forecastDate.toISOString().split('T')[0];
-                
-                // Chỉ lấy một dự báo cho mỗi ngày (ưu tiên thời điểm từ 12h-15h)
-                if (!processedDates.has(dateString) && forecastDate.getHours() >= 12 && forecastDate.getHours() <= 15) {
-                    processedDates.add(dateString);
-                    dailyForecasts.push({
-                        date: forecastDate,
-                        weather: forecast.weather[0],
-                        temp: Math.round(forecast.main.temp),
-                        humidity: forecast.main.humidity,
-                        windSpeed: forecast.wind.speed
-                    });
-                }
-            });
-            
-            // Nếu chưa đủ 5 ngày (do không có dự báo vào buổi trưa), bổ sung thêm
-            weatherData.list.forEach(forecast => {
-                const forecastDate = new Date(forecast.dt * 1000);
-                const dateString = forecastDate.toISOString().split('T')[0];
-                
-                if (!processedDates.has(dateString) && dailyForecasts.length < 5) {
-                    processedDates.add(dateString);
-                    dailyForecasts.push({
-                        date: forecastDate,
-                        weather: forecast.weather[0],
-                        temp: Math.round(forecast.main.temp),
-                        humidity: forecast.main.humidity,
-                        windSpeed: forecast.wind.speed
-                    });
-                }
-            });
-            
-            // Sắp xếp theo ngày
-            dailyForecasts.sort((a, b) => a.date - b.date);
-            
-            // Tạo câu trả lời dựa trên loại thời tiết người dùng hỏi
-            let response = `Dự báo thời tiết tuần này ở ${cityName}:\n`;
-            
-            dailyForecasts.forEach(forecast => {
-                const dayName = forecast.date.toLocaleDateString('vi-VN', { weekday: 'long' });
-                const dateStr = forecast.date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-                
-                if (weatherType === 'rain') {
-                    const isRaining = forecast.weather.description.includes('mưa') || forecast.weather.description.includes('rain');
-                    response += `${dayName} (${dateStr}): ${isRaining ? 'Có mưa' : 'Không mưa'}\n`;
-                } else if (weatherType === 'temperature') {
-                    response += `${dayName} (${dateStr}): ${forecast.temp}°C\n`;
-                } else if (weatherType === 'wind') {
-                    response += `${dayName} (${dateStr}): Gió ${forecast.windSpeed} m/s\n`;
-                } else if (weatherType === 'humidity') {
-                    response += `${dayName} (${dateStr}): Độ ẩm ${forecast.humidity}%\n`;
-                } else if (weatherType === 'sunny') {
-                    const isSunny = forecast.weather.description.includes('nắng') || forecast.weather.description.includes('quang') || forecast.weather.description.includes('clear');
-                    response += `${dayName} (${dateStr}): ${isSunny ? 'Có nắng' : 'Không nắng'}\n`;
-                } else {
-                    // Thông tin chung
-                    response += `${dayName} (${dateStr}): ${forecast.weather.description}, ${forecast.temp}°C\n`;
-                }
-            });
-            
-            return response;
-        } catch (error) {
-            console.error('Error generating week forecast response:', error);
-            return `Sorry, I cannot process weekly forecast information for ${location}.`;
+    // Gợi ý trang phục
+    else if (lowerMessage.includes('mặc gì') || 
+             lowerMessage.includes('trang phục') || 
+             lowerMessage.includes('quần áo') || 
+             lowerMessage.includes('gợi ý')) {
+        
+        const temp = currentWeatherData.main.temp;
+        const weatherId = currentWeatherData.weather[0].id;
+        const isRaining = weatherId >= 200 && weatherId < 700;
+        const isWindy = currentWeatherData.wind.speed > 5.5; // m/s
+        const humidity = currentWeatherData.main.humidity;
+        const description = currentWeatherData.weather[0].description;
+        
+        let clothingSuggestions = [];
+        let activitySuggestions = [];
+        
+        // Dựa vào nhiệt độ
+        if (temp < 10) {
+            clothingSuggestions.push('Áo khoác dày', 'Găng tay', 'Mũ len', 'Khăn quàng cổ', 'Quần dài dày', 'Giày bốt');
+            activitySuggestions.push('Hoạt động trong nhà', 'Uống đồ ấm');
+        } else if (temp < 20) {
+            clothingSuggestions.push('Áo khoác nhẹ hoặc áo len', 'Quần dài', 'Giày kín');
+            activitySuggestions.push('Đi dạo trong công viên', 'Picnic ngoài trời');
+        } else if (temp < 30) {
+            clothingSuggestions.push('Áo sơ mi hoặc áo thun', 'Quần dài hoặc quần short', 'Giày thoáng khí');
+            activitySuggestions.push('Các hoạt động ngoài trời', 'Đi bơi', 'Đạp xe');
+        } else {
+            clothingSuggestions.push('Áo thun nhẹ', 'Quần short', 'Váy', 'Dép hoặc sandal');
+            activitySuggestions.push('Đi bơi', 'Tránh hoạt động ngoài trời vào giữa trưa', 'Uống nhiều nước');
         }
+        
+        // Thêm gợi ý dựa vào thời tiết
+        if (isRaining) {
+            if (weatherId >= 200 && weatherId < 300) {
+                clothingSuggestions.push('Áo mưa dày', 'Giày không thấm nước', 'Tránh mang đồ kim loại');
+                activitySuggestions = ['Ở trong nhà', 'Tránh các khu vực cao, hở'];
+            } else {
+                clothingSuggestions.push('Áo mưa hoặc ô', 'Giày không thấm nước');
+                activitySuggestions.push('Các hoạt động trong nhà');
+            }
+        }
+        
+        if (isWindy) {
+            clothingSuggestions.push('Áo khoác chắn gió', 'Mũ có dây buộc');
+            activitySuggestions.push('Tránh các khu vực có nhiều cây cối');
+        }
+        
+        // Thêm gợi ý về chống nắng nếu trời nắng
+        if (weatherId === 800 && temp > 25) { // Trời quang và nóng
+            clothingSuggestions.push('Mũ rộng vành', 'Kính râm', 'Kem chống nắng SPF 30+', 'Áo chống nắng');
+            activitySuggestions.push('Tìm bóng râm', 'Uống nhiều nước');
+        }
+        
+        const suggestionsList = clothingSuggestions
+            .map(item => `<li>${item}</li>`)
+            .join('');
+            
+        const activitiesList = activitySuggestions
+            .map(item => `<li>${item}</li>`)
+            .join('');
+        
+        botResponse = `
+            <div class="chatbot-message bot">
+                <div class="message-content">
+                    <p>Với nhiệt độ ${Math.round(temp)}°C và thời tiết ${description}, tôi gợi ý:</p>
+                    <p><strong>Trang phục:</strong></p>
+                    <ul>
+                        ${suggestionsList}
+                    </ul>
+                    <p><strong>Hoạt động phù hợp:</strong></p>
+                    <ul>
+                        ${activitiesList}
+                    </ul>
+                    <p>Độ ẩm hiện tại là ${humidity}%, hãy điều chỉnh trang phục cho phù hợp.</p>
+                </div>
+            </div>
+        `;
     }
+    // Vị trí
+    else if (lowerMessage.includes('vị trí') || 
+             lowerMessage.includes('ở đâu') || 
+             lowerMessage.includes('thành phố')) {
+        
+        const location = `${currentWeatherData.name}, ${currentWeatherData.sys.country}`;
+        const coordinates = `${currentWeatherData.coord.lat.toFixed(2)}, ${currentWeatherData.coord.lon.toFixed(2)}`;
+        const sunrise = new Date(currentWeatherData.sys.sunrise * 1000).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+        const sunset = new Date(currentWeatherData.sys.sunset * 1000).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+        
+        botResponse = `
+            <div class="chatbot-message bot">
+                <div class="message-content">
+                    <p>Thông tin vị trí hiện tại:</p>
+                    <ul>
+                        <li>Thành phố: ${location}</li>
+                        <li>Tọa độ: ${coordinates}</li>
+                        <li>Bình minh: ${sunrise}</li>
+                        <li>Hoàng hôn: ${sunset}</li>
+                    </ul>
+                    <p>Bạn có thể xem thêm thông tin chi tiết về thành phố này trong mục Thành phố trên thanh điều hướng.</p>
+                </div>
+            </div>
+        `;
+    }
+    // Thêm câu hỏi về chất lượng không khí
+    else if (lowerMessage.includes('không khí') || 
+             lowerMessage.includes('ô nhiễm') || 
+             lowerMessage.includes('aqi')) {
+        
+        botResponse = `
+            <div class="chatbot-message bot">
+                <div class="message-content">
+                    <p>Hiện tại tôi chưa có dữ liệu chi tiết về chất lượng không khí.</p>
+                    <p>Tuy nhiên, dựa vào điều kiện thời tiết hiện tại, chất lượng không khí có thể được đánh giá sơ bộ như sau:</p>
+                    <ul>
+                        <li>Tốc độ gió: ${Math.round(currentWeatherData.wind.speed * 3.6)} km/h</li>
+                        <li>Độ ẩm: ${currentWeatherData.main.humidity}%</li>
+                        <li>Thời tiết: ${currentWeatherData.weather[0].description}</li>
+                    </ul>
+                    <p>Để có thông tin chính xác hơn, bạn nên kiểm tra các ứng dụng chuyên về chất lượng không khí.</p>
+                </div>
+            </div>
+        `;
+    }
+    // Thêm câu hỏi về dự báo
+    else if (lowerMessage.includes('dự báo') || 
+             lowerMessage.includes('ngày mai') || 
+             lowerMessage.includes('tuần này')) {
+        
+        botResponse = `
+            <div class="chatbot-message bot">
+                <div class="message-content">
+                    <p>Để xem dự báo thời tiết chi tiết, bạn có thể:</p>
+                    <ul>
+                        <li>Chuyển đến trang Dự báo trên thanh điều hướng</li>
+                        <li>Xem dự báo theo giờ và theo ngày</li>
+                        <li>Xem biểu đồ nhiệt độ trong những ngày tới</li>
+                    </ul>
+                    <p>Trang Dự báo sẽ cung cấp thông tin chi tiết hơn về thời tiết trong những ngày tới.</p>
+                </div>
+            </div>
+        `;
+    }
+    // Trả lời mặc định nếu không hiểu câu hỏi
+    else {
+        botResponse = `
+            <div class="chatbot-message bot">
+                <div class="message-content">
+                    <p>Tôi có thể giúp bạn với thông tin về:</p>
+                    <ul>
+                        <li>Thời tiết và nhiệt độ hiện tại</li>
+                        <li>Nguy cơ mưa</li>
+                        <li>Gợi ý trang phục phù hợp</li>
+                        <li>Thông tin vị trí</li>
+                        <li>Chất lượng không khí (sơ bộ)</li>
+                        <li>Hướng dẫn xem dự báo</li>
+                    </ul>
+                    <p>Vui lòng hỏi tôi về một trong những chủ đề trên.</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Hiển thị phản hồi của bot
+    removeTypingIndicator();
+    const messages = document.getElementById('chatbot-messages');
+    messages.innerHTML += botResponse;
+    scrollToBottom();
+}
+
+// Cuộn xuống cuối cùng của khung chat
+function scrollToBottom() {
+    const messages = document.getElementById('chatbot-messages');
+    if (messages) {
+        messages.scrollTop = messages.scrollHeight;
+    }
+}
+
+// Hàm escape HTML để tránh XSS
+function escapeHTML(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Hàm để cập nhật dữ liệu thời tiết hiện tại
+function updateCurrentWeatherData(data) {
+    currentWeatherData = data;
+    
+    // Tạo một sự kiện tùy chỉnh để thông báo rằng dữ liệu thời tiết đã được cập nhật
+    const event = new CustomEvent('weatherDataUpdated', { detail: data });
+    document.dispatchEvent(event);
+}
+
+// Export các hàm cần thiết
+window.weatherChatbot = {
+    init: initChatbot,
+    updateWeatherData: updateCurrentWeatherData
+};
